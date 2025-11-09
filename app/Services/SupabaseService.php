@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log; // ← TAMBAH INI!
+use Illuminate\Support\Facades\Log;
 
 class SupabaseService
 {
@@ -19,63 +19,67 @@ class SupabaseService
             'apikey' => $this->key,
             'Authorization' => 'Bearer ' . $this->key,
             'Content-Type' => 'application/json',
+            'Prefer' => 'return=minimal'
         ];
     }
 
+    // 1. GET ROOM BY UUID
     public function getRoom($id)
     {
         $response = Http::withHeaders($this->headers)
-            ->get("{$this->url}/rooms", [
-                'id' => "eq.{$id}"
-            ]);
+            ->get("{$this->url}/rooms", ['id' => "eq.{$id}"]);
 
         if ($response->failed()) {
-            Log::error('Supabase Error: ' . $response->body()); // ← SEKARANG JALAN!
+            Log::error('Supabase getRoom Error: ' . $response->body());
             return [];
         }
 
         return $response->json();
     }
 
+    // 2. CREATE BOOKING
     public function createBooking($data)
     {
         return Http::withHeaders($this->headers)
             ->post("{$this->url}/bookings", $data);
     }
 
-    public function getAllBookingsWithRoom()
+    // 3. GET ALL BOOKINGS + ROOM INFO
+        public function getAllBookingsWithRoom()
     {
-        return Http::withHeaders($this->headers)
+        $response = Http::withHeaders($this->headers)
             ->get("{$this->url}/bookings", [
-                'select' => '*,room:rooms(name,location,price)',
+                'select' => '*,room:rooms(name,location,price,image)',
                 'order' => 'created_at.desc'
-            ])
-            ->json();
-    }
+            ]);
 
+        return $response->body(); // RETURN STRING, BUKAN ->json()!
+    }
+    // 4. UPDATE STATUS (PAKAI UUID!)
     public function updateBookingStatus($id, $status)
     {
         return Http::withHeaders($this->headers)
-            ->patch("{$this->url}/bookings", ['status' => $status])
-            ->withQueryParameters(['id' => "eq.{$id}"]);
+            ->patch("{$this->url}/bookings?id=eq.{$id}", ['status' => $status]);
     }
 
+    // 5. DELETE BOOKING (PAKAI UUID!)
     public function deleteBooking($id)
     {
         return Http::withHeaders($this->headers)
-            ->delete("{$this->url}/bookings", ['id' => "eq.{$id}"]);
+            ->delete("{$this->url}/bookings?id=eq.{$id}");
     }
 
-    public function getLatestBookingId()
+    // 6. HITUNG TOTAL BOOKING → UNTUK B001, B002, B003
+    public function getBookingCount()
     {
-        $data = Http::withHeaders($this->headers)
-            ->get("{$this->url}/bookings", [
-                'select' => 'id',
-                'order' => 'id.desc',
-                'limit' => 1
-            ])
-            ->json();
+        $response = Http::withHeaders($this->headers)
+            ->get("{$this->url}/bookings", ['select' => 'id']);
 
-        return $data ? (int) end($data)['id'] : 0;
+        if ($response->failed()) {
+            Log::error('getBookingCount failed: ' . $response->body());
+            return 0;
+        }
+
+        return count($response->json());
     }
 }

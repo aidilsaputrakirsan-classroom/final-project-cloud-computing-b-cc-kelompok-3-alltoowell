@@ -3,16 +3,16 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
 
-Route::middleware('auth')->group(function () {
-    Route::get('/booking/{room}', [BookingController::class, 'create'])->name('booking.create');
-    Route::post('/booking/{room}', [BookingController::class, 'store'])->name('booking.store');
+// SEMUA ROOM: /booking/room1, room2, room999
+Route::get('/booking/{roomCode}', [BookingController::class, 'show'])
+    ->where('roomCode', 'room[0-9]+');
 
-    Route::middleware('admin')->group(function () {
-        Route::get('/admin/bookings', [BookingController::class, 'index'])->name('admin.bookings');
-        Route::patch('/admin/bookings/{id}', [BookingController::class, 'update'])->name('admin.bookings.update');
-    });
-});
+Route::post('/booking/{roomCode}', [BookingController::class, 'store'])
+    ->where('roomCode', 'room[0-9]+');
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// ADMIN
+Route::get('/admin', [BookingController::class, 'index']);
+Route::patch('/admin/{id}', [BookingController::class, 'update']);
+Route::delete('/admin/{id}', [BookingController::class, 'destroy']);
+
+Route::get('/', fn() => redirect('/booking/room1'));

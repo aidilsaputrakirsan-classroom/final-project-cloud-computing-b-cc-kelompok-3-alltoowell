@@ -3,30 +3,44 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Storage;
 
 class RoomController extends Controller
 {
-    // ✅ Tidak menggunakan middleware login
-    public function index(Request $request)
+    protected $baseUrl;
+    protected $apiKey;
+
+    public function __construct()
     {
-        $query = Room::query();
+        $this->baseUrl = env('SUPABASE_URL') . '/rest/v1';
+        $this->apiKey = env('SUPABASE_KEY');
+    }
 
-        if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('location', 'like', '%' . $request->search . '%');
-            });
+    // Ambil semua data kamar
+    public function index()
+    {
+        $response = Http::withHeaders([
+            'apikey' => $this->apiKey,
+            'Authorization' => 'Bearer ' . $this->apiKey,
+        ])->get("{$this->baseUrl}/rooms");
+
+        if ($response->failed()) {
+            return back()->with('error', 'Gagal mengambil data dari Supabase: ' . $response->body());
         }
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
+        // ambil data mentah dari Supabase
+        $raw = $response->json() ?? [];
 
-        $rooms = $query->orderBy('created_at', 'desc')->paginate(10);
+        // pastikan setiap entry memiliki key 'uuid' (fallback ke 'id' bila perlu)
+        $rooms = collect($raw)->map(function ($r) {
+            $row = is_array($r) ? $r : (array) $r;
+            if (!isset($row['uuid']) && isset($row['id'])) {
+                $row['uuid'] = $row['id'];
+            }
+            return $row;
+        })->all();
 
         return view('admin.rooms.index', compact('rooms'));
     }
@@ -36,6 +50,7 @@ class RoomController extends Controller
         return view('admin.rooms.create');
     }
 
+    // Tambah data kamar
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -50,25 +65,45 @@ class RoomController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // 🖼️ Simpan gambar ke folder public/storage/rooms
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('rooms', 'public');
             $validated['image'] = '/storage/' . $path;
         }
 
-        // 🚀 Simpan ke database
-        Room::create($validated);
+        $response = Http::withHeaders([
+            'apikey' => $this->apiKey,
+            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Content-Type' => 'application/json',
+            'Prefer' => 'return=minimal',
+        ])->post("{$this->baseUrl}/rooms", $validated);
 
-        return redirect()->route('admin.rooms.index')
-            ->with('success', 'Kamar berhasil ditambahkan!');
+        if ($response->failed()) {
+            return back()->with('error', 'Gagal menambah data ke Supabase: ' . $response->body());
+        }
+
+        return redirect()->route('admin.rooms.index')->with('success', 'Kamar berhasil ditambahkan!');
     }
 
-    public function edit(Room $room)
+    // Edit data kamar
+    public function edit($id)
     {
+        $response = Http::withHeaders([
+            'apikey' => $this->apiKey,
+            'Authorization' => 'Bearer ' . $this->apiKey,
+        ])->get("{$this->baseUrl}/rooms?id=eq.$id");
+
+        if ($response->failed()) {
+            return back()->with('error', 'Gagal mengambil data dari Supabase: ' . $response->body());
+        }
+
+        $room = $response->json()[0] ?? null;
+        if (!$room) return back()->with('error', 'Data tidak ditemukan.');
+
         return view('admin.rooms.edit', compact('room'));
     }
 
-    public function update(Request $request, Room $room)
+    // Update data kamar
+    public function update(Request $request, $id)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:100',
@@ -82,30 +117,47 @@ class RoomController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // 🖼️ Ganti gambar lama (jika ada)
         if ($request->hasFile('image')) {
-            if ($room->image && file_exists(public_path($room->image))) {
-                unlink(public_path($room->image));
-            }
             $path = $request->file('image')->store('rooms', 'public');
             $validated['image'] = '/storage/' . $path;
         }
 
-        // 🔄 Update data
-        $room->update($validated);
+        $response = Http::withHeaders([
+            'apikey' => $this->apiKey,
+            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Content-Type' => 'application/json',
+            'Prefer' => 'return=minimal',
+        ])->patch("{$this->baseUrl}/rooms?id=eq.$id", $validated);
 
-        return redirect()->route('admin.rooms.index')
-            ->with('success', 'Kamar berhasil diperbarui!');
-    }
-
-    public function destroy(Room $room)
-    {
-        // 🗑️ Hapus gambar (jika ada)
-        if ($room->image && file_exists(public_path($room->image))) {
-            unlink(public_path($room->image));
+        if ($response->failed()) {
+            return back()->with('error', 'Gagal memperbarui data: ' . $response->body());
         }
 
-        $room->delete();
-        return back()->with('success', 'Kamar dihapus!');
+        return redirect()->route('admin.rooms.index')->with('success', 'Data kamar berhasil diperbarui!');
+    }
+
+    // Hapus data kamar (menggunakan HTTP request, bukan SDK)
+    public function destroy($uuid)
+    {
+        try {
+            $response = Http::withHeaders([
+                'apikey' => $this->apiKey,
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+                'Prefer' => 'return=minimal',
+            ])->delete("{$this->baseUrl}/rooms?uuid=eq.$uuid");
+
+            if ($response->successful()) {
+                return redirect()->route('admin.rooms.index')
+                    ->with('success', 'Kamar berhasil dihapus!');
+            }
+
+            // bila gagal, tampilkan body pesan dari Supabase
+            return redirect()->route('admin.rooms.index')
+                ->with('error', 'Gagal menghapus kamar: ' . $response->body());
+        } catch (\Exception $e) {
+            return redirect()->route('admin.rooms.index')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 }

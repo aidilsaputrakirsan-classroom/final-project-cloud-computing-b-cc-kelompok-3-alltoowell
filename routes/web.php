@@ -11,6 +11,6 @@ Route::prefix('admin')
         Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
         Route::get('/rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
         Route::put('/rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
-        Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
+        Route::delete('/rooms/{uuid}', [RoomController::class, 'destroy'])->name('rooms.destroy');
         Route::post('/rooms/bulk', [RoomController::class, 'bulkAction'])->name('rooms.bulk');
     });

@@ -15,69 +15,98 @@ class SupabaseService
     {
         $this->url = config('services.supabase.url');
         $this->key = config('services.supabase.key');
+
         $this->headers = [
             'apikey' => $this->key,
             'Authorization' => 'Bearer ' . $this->key,
             'Content-Type' => 'application/json',
-            'Prefer' => 'return=minimal'
+            'Prefer' => 'return=representation'
         ];
     }
 
-    // 1. GET ROOM BY UUID
-    public function getRoom($id)
+    // 1. GET ALL ROOMS
+    public function getAllRooms()
     {
         $response = Http::withHeaders($this->headers)
-            ->get("{$this->url}/rooms", ['id' => "eq.{$id}"]);
+            ->get("{$this->url}/rooms", [
+                'select' => '*',
+                'order' => 'room_number.asc'
+            ]);
 
-        if ($response->failed()) {
-            Log::error('Supabase getRoom Error: ' . $response->body());
-            return [];
-        }
-
-        return $response->json();
+        return $response->successful() ? $response->json() : [];
     }
 
-    // 2. CREATE BOOKING
+    // 2. GET ROOM BY room_number
+    public function getRoomByNumber($number)
+    {
+        $response = Http::withHeaders($this->headers)
+            ->get("{$this->url}/rooms", [
+                'room_number' => "eq.{$number}"
+            ]);
+
+        return $response->successful() ? $response->json() : [];
+    }
+
+    // 3. CREATE BOOKING
     public function createBooking($data)
     {
-        return Http::withHeaders($this->headers)
-            ->post("{$this->url}/bookings", $data);
+        $response = Http::withHeaders($this->headers)->post("{$this->url}/bookings", $data);
+
+        if ($response->failed()) {
+            Log::error('Supabase createBooking Error: ' . $response->body());
+        }
+        return $response;
     }
 
-    // 3. GET ALL BOOKINGS + ROOM INFO
-        public function getAllBookingsWithRoom()
+    // 4. GET ALL BOOKINGS + ROOM INFO
+    public function getAllBookingsWithRoom()
     {
         $response = Http::withHeaders($this->headers)
             ->get("{$this->url}/bookings", [
-                'select' => '*,room:rooms(name,location,price,image)',
+                'select' => '*,room:rooms(name,price,location,image,room_number)',
                 'order' => 'created_at.desc'
             ]);
 
-        return $response->body(); // RETURN STRING, BUKAN ->json()!
+        return $response->successful() ? $response->body() : '[]';
     }
-    // 4. UPDATE STATUS (PAKAI UUID!)
+
+    // 5. UPDATE STATUS BOOKING (INI YANG BENAR!)
     public function updateBookingStatus($id, $status)
     {
-        return Http::withHeaders($this->headers)
-            ->patch("{$this->url}/bookings?id=eq.{$id}", ['status' => $status]);
+        $response = Http::withHeaders($this->headers)
+            ->patch("{$this->url}/bookings?id=eq.{$id}", [
+                'status' => $status
+            ]);
+
+        if ($response->failed()) {
+            Log::error('Supabase updateBookingStatus Error: ' . $response->body());
+        }
+        return $response;
     }
 
-    // 5. DELETE BOOKING (PAKAI UUID!)
+    // 6. DELETE BOOKING (INI YANG BENAR!)
     public function deleteBooking($id)
     {
-        return Http::withHeaders($this->headers)
+        $response = Http::withHeaders($this->headers)
             ->delete("{$this->url}/bookings?id=eq.{$id}");
+
+        if ($response->failed()) {
+            Log::error('Supabase deleteBooking Error: ' . $response->body());
+        }
+        return $response;
     }
 
-    // 6. HITUNG TOTAL BOOKING → UNTUK B001, B002, B003
+    // 7. HITUNG TOTAL BOOKING
     public function getBookingCount()
     {
         $response = Http::withHeaders($this->headers)
             ->get("{$this->url}/bookings", ['select' => 'id']);
 
-        if ($response->failed()) {
-            Log::error('getBookingCount failed: ' . $response->body());
-            return 0;
+        if ($response->failed()) return 0;
+
+        $range = $response->header('Content-Range');
+        if ($range && preg_match('/\/(\d+)$/', $range, $matches)) {
+            return (int)$matches[1];
         }
 
         return count($response->json());

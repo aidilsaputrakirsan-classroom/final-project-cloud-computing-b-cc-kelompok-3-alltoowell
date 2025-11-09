@@ -3,72 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KOST-SI @yield('title')</title>
-
-    <!-- Tailwind CSS CDN -->
+    <title>KOST-SI - @yield('title', 'Booking')</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
     <script>
         tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#5B4FE3',
-                        accent: '#10B981',
-                        background: '#ffffff',
-                        foreground: '#1a1a1a',
-                        muted: '#ececf0',
-                        'muted-foreground': '#717182',
-                        border: '#d1d5db',
-                    }
-                }
-            }
+            theme: { extend: { colors: { primary: '#5B4FE3' } } }
         }
     </script>
-
-    <style>
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #5B4FE3; border-radius: 5px; }
-        ::-webkit-scrollbar-thumb:hover { background: #4a3ec9; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
-        .animate-slide-in { animation: slideIn 0.5s ease-out; }
-
-        .room-card {
-            transition: all 0.3s ease;
-        }
-        .room-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        }
-        .room-card img {
-            transition: transform 0.5s ease;
-        }
-        .room-card:hover img {
-            transform: scale(1.1);
-        }
-    </style>
 </head>
 <body class="bg-gray-50">
     @include('components.navbar')
-    <main>@yield('content')</main>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-white border rounded-lg shadow-lg p-4 translate-y-20 transition-transform z-50 hidden">
+        <div class="flex items-center gap-3">
+            <div id="toast-icon"></div>
+            <p id="toast-message"></p>
+        </div>
+    </div>
+
+    <main class="min-h-screen">
+        @yield('content')
+    </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
+        @if(session('toast'))
+            showToast("{{ session('toast') }}", 'success');
+        @endif
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast'), m = document.getElementById('toast-message'), i = document.getElementById('toast-icon');
+            m.textContent = msg;
+            i.innerHTML = type === 'success'
+                ? '<i data-lucide="check-circle-2" class="w-5 h-5 text-green-500"></i>'
+                : '<i data-lucide="x-circle" class="w-5 h-5 text-red-500"></i>';
+            t.classList.remove('hidden'); t.style.transform = 'translateY(0)';
             lucide.createIcons();
-        });
+            setTimeout(() => { t.style.transform = 'translateY(200px)'; setTimeout(() => t.classList.add('hidden'), 300); }, 3000);
+        }
     </script>
 </body>
 </html>

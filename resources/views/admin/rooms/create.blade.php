@@ -49,7 +49,7 @@
                     <!-- Kanan -->
                     <div class="space-y-8">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Wi-Fi, AC, pisahkan dengan koma)</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Wi-Fi, AC, pisahkan dengan koma</label>
                             <input type="text" id="facilities_input" value="{{ old('facilities_input') }}"
                                    class="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:ring-4 focus:ring-[#4F46E5]/30 focus:border-[#4F46E5]"
                                    placeholder="Wi-Fi, AC, Kamar mandi dalam">

@@ -4,7 +4,7 @@
 @section('content')
 <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
     <div class="text-center mb-6">
-        <h1 class="text-3xl font-bold text-green-600">Daftar SI-KOST</h1>
+        <h1 class="text-3xl font-bold text-purple-600">Daftar SI-KOST</h1>
     </div>
 
     <form action="{{ route('register') }}" method="POST">
@@ -38,13 +38,13 @@
                    class="w-full p-3 border rounded-lg">
         </div>
 
-        <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">
+        <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700">
             Daftar
         </button>
     </form>
 
     <p class="text-center mt-4 text-sm">
-        Sudah punya akun? <a href="{{ route('login') }}" class="text-green-600 font-semibold">Login</a>
+        Sudah punya akun? <a href="{{ route('login') }}" class="text-purple-600 font-semibold">Login</a>
     </p>
 </div>
 @endsection

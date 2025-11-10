@@ -29,6 +29,15 @@ Route::prefix('admin')
     });
 
 // ================== Auth Routes ==================
+
+// Menampilkan halaman login
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+// Proses login
 Route::post('login', [AuthController::class, 'login']);
+// Logout
 Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+
+// Menampilkan halaman register
+Route::get('register', [AuthController::class, 'showRegisterForm'])->name('register');
+// Proses register
+Route::post('register', [AuthController::class, 'register']);

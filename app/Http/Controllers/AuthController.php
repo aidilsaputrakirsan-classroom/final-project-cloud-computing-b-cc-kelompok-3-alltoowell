@@ -19,13 +19,13 @@ class AuthController extends Controller
     }
 
     // 🟢 Menampilkan halaman login
-    public function showLogin()
+    public function showLoginForm()
     {
         return view('auth.login');
     }
 
     // 🟢 Menampilkan halaman register
-    public function showRegister()
+    public function showRegisterForm()
     {
         return view('auth.register');
     }
@@ -40,7 +40,6 @@ class AuthController extends Controller
             'password' => 'required|min:6|confirmed'
         ]);
 
-        // Normalisasi email agar konsisten
         $email = strtolower(trim($request->email));
 
         $response = Http::withHeaders([
@@ -64,7 +63,7 @@ class AuthController extends Controller
         return redirect('/login')->with('success', 'Registrasi berhasil! Silakan login.');
     }
 
-    // 🟣 Proses login
+    // 🔵 Proses login
     public function login(Request $request)
     {
         $request->validate([
@@ -72,10 +71,8 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        // Normalisasi email
         $email = strtolower(trim($request->email));
 
-        // 🔍 Ambil data user dari Supabase
         $response = Http::withHeaders([
             'apikey' => $this->supabaseKey,
             'Authorization' => 'Bearer ' . $this->supabaseKey,
@@ -84,7 +81,6 @@ class AuthController extends Controller
             'select' => '*'
         ]);
 
-        // Jika gagal koneksi atau tidak ada data
         if ($response->failed()) {
             throw ValidationException::withMessages(['email' => 'Gagal menghubungi server Supabase.']);
         }
@@ -96,12 +92,10 @@ class AuthController extends Controller
 
         $user = $users[0];
 
-        // 🔐 Verifikasi password
         if (!Hash::check($request->password, $user['password'])) {
             throw ValidationException::withMessages(['password' => 'Password salah.']);
         }
 
-        // 🔒 Simpan data ke session
         session([
             'user_id' => $user['id'],
             'user_name' => $user['name'],
@@ -110,11 +104,8 @@ class AuthController extends Controller
             'user_phone' => $user['phone']
         ]);
 
-        // 🔁 Arahkan sesuai role
         return redirect()->intended(
-            $user['role'] === 'admin'
-                ? '/admin/dashboard'
-                : '/user/dashboard'
+            $user['role'] === 'admin' ? '/admin/dashboard' : '/user/dashboard'
         );
     }
 

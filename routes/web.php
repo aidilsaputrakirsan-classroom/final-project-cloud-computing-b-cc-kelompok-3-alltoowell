@@ -1,8 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\RoomController;
+use App\Http\Controllers\HomeController;
 
+// ================== Route Home ==================
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// ================== Route Admin ==================
 Route::prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -10,7 +16,7 @@ Route::prefix('admin')
         // 1️⃣ Halaman daftar kamar
         Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
 
-        // 2️⃣ Form tambah kamar (harus di atas route dinamis)
+        // 2️⃣ Form tambah kamar
         Route::get('/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
         Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
 
@@ -21,3 +27,8 @@ Route::prefix('admin')
         // 4️⃣ Hapus kamar
         Route::delete('/rooms/{id}', [RoomController::class, 'destroy'])->name('rooms.destroy');
     });
+
+// ================== Auth Routes ==================
+Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('login', [AuthController::class, 'login']);
+Route::post('logout', [AuthController::class, 'logout'])->name('logout');

@@ -4,6 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Services\SupabaseService;
 use Illuminate\Http\Request;
+use function view;
+use function abort;
+use function back;
+use function redirect;
+use function now;
 
 class BookingController extends Controller
 {
@@ -14,40 +19,41 @@ class BookingController extends Controller
         $this->supabase = $supabase;
     }
 
-    // TAMPILKAN FORM BOOKING DENGAN URL /booking/room1, room2, dll
+    /**
+     * Tampilkan form booking berdasarkan kode kamar.
+     * Contoh URL: /booking/room1, /booking/room2, dst.
+     */
     public function show($roomCode)
     {
-        // Ambil angka dari "room1" → 1
         $number = ltrim($roomCode, 'room');
 
-        // DAFTAR SEMUA KAMAR (TAMBAH SEPUASNYA DI SINI!)
+        // Daftar kamar yang tersedia
         $rooms = [
             1 => [
                 'id' => 'e2bfc970-b3f0-4a4f-bde5-0ab60f628e10',
                 'name' => 'Kamar Deluxe',
                 'price' => 1500000,
-                'location' => 'Lantai 2'
+                'location' => 'Lantai 2',
             ],
             2 => [
                 'id' => '8f1a2b3c-4d5e-6f7g-8h9i-0j1k2l3m4n5o',
                 'name' => 'Kamar Standard',
                 'price' => 900000,
-                'location' => 'Lantai 1'
+                'location' => 'Lantai 1',
             ],
             3 => [
                 'id' => '1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p',
                 'name' => 'Kamar VIP',
                 'price' => 2000000,
-                'location' => 'Lantai 3'
+                'location' => 'Lantai 3',
             ],
             4 => [
                 'id' => 'uuid-kamar-4',
                 'name' => 'Kamar Family',
                 'price' => 2500000,
-                'location' => 'Lantai 4'
+                'location' => 'Lantai 4',
             ],
-            // TAMBAH KAMAR BARU DI SINI AJA!
-            // 99 => ['id' => 'uuid-nya', 'name' => 'Kamar Premium', 'price' => 3000000, 'location' => 'Lantai 99'],
+            // Tambahkan kamar lain di sini jika perlu
         ];
 
         if (!isset($rooms[$number])) {
@@ -57,15 +63,17 @@ class BookingController extends Controller
         return view('booking.create', ['room' => $rooms[$number]]);
     }
 
-    // SIMPAN BOOKING DARI /booking/room1, room2, dll
+    /**
+     * Simpan data booking ke database (via Supabase).
+     */
     public function store(Request $request, $roomCode)
     {
         $number = ltrim($roomCode, 'room');
+
         $rooms = [
             1 => ['id' => 'e2bfc970-b3f0-4a4f-bde5-0ab60f628e10', 'price' => 1500000],
             2 => ['id' => '8f1a2b3c-4d5e-6f7g-8h9i-0j1k2l3m4n5o', 'price' => 900000],
             3 => ['id' => '1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p', 'price' => 2000000],
-            // tambah di sini...
         ];
 
         if (!isset($rooms[$number])) {
@@ -75,6 +83,7 @@ class BookingController extends Controller
         $room = $rooms[$number];
         $roomId = $room['id'];
 
+        // Validasi form
         $request->validate([
             'name'       => 'required|string|max:255',
             'email'      => 'required|email',
@@ -98,7 +107,7 @@ class BookingController extends Controller
             'user_phone'     => $request->phone,
             'nik'            => $request->nik,
             'start_date'     => $request->start_date,
-            'duration'       => (int)$request->duration,
+            'duration'       => (int) $request->duration,
             'payment_method' => $request->payment,
             'total_price'    => $totalPrice,
             'status'         => 'pending',
@@ -114,7 +123,9 @@ class BookingController extends Controller
         return redirect('/admin')->with('toast', "Booking {$bookingId} berhasil!");
     }
 
-    // ADMIN PANEL
+    /**
+     * Tampilkan semua data booking untuk admin.
+     */
     public function index()
     {
         $response = $this->supabase->getAllBookingsWithRoom();
@@ -124,7 +135,9 @@ class BookingController extends Controller
         return view('admin.bookings', compact('bookings'));
     }
 
-    // UPDATE STATUS
+    /**
+     * Update status booking (confirmed / rejected / cancelled).
+     */
     public function update(Request $request, $id)
     {
         $request->validate(['status' => 'required|in:confirmed,rejected,cancelled']);
@@ -137,13 +150,17 @@ class BookingController extends Controller
         return back()->with('toast', 'Status berhasil diubah!');
     }
 
-    // HAPUS
+    /**
+     * Hapus booking dari database.
+     */
     public function destroy($id)
     {
         $response = $this->supabase->deleteBooking($id);
+
         if ($response->failed()) {
             return back()->with('error', 'Gagal hapus');
         }
+
         return back()->with('toast', 'Booking dihapus!');
     }
 }

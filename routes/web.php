@@ -36,7 +36,7 @@ Route::get('/rooms/{id}', [RoomController::class, 'show'])->whereNumber('id')->n
 
 /*
 |--------------------------------------------------------------------------
-| BOOKING USER (PUBLIC)
+| BOOKING USER
 |--------------------------------------------------------------------------
 */
 Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
@@ -44,15 +44,14 @@ Route::post('/booking/{id}', [BookingController::class, 'store'])->name('booking
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN (TERPROTEKSI role:admin)
+| ADMIN (role:admin)
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')
     ->middleware(['role:admin'])
     ->name('admin.')
     ->group(function () {
-
-        // Dashboard Admin (Pakai data Supabase)
+        
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // CRUD Kamar
@@ -63,11 +62,11 @@ Route::prefix('admin')
         Route::put('/rooms/{id}', [AdminRoomController::class, 'update'])->name('rooms.update');
         Route::delete('/rooms/{id}', [AdminRoomController::class, 'destroy'])->name('rooms.destroy');
 
-        // Admin Kelola Pengguna
+        // Pengguna
         Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna.index');
         Route::put('/pengguna/{id}', [PenggunaController::class, 'update'])->name('pengguna.update');
 
-        // Admin Booking
+        // Booking
         Route::get('/booking', [AdminBookingController::class, 'index'])->name('booking.index');
         Route::patch('/booking/{id}', [AdminBookingController::class, 'update'])->name('booking.update');
         Route::delete('/booking/{id}', [AdminBookingController::class, 'destroy'])->name('booking.destroy');
@@ -92,10 +91,10 @@ Route::prefix('user')
 | AUTH
 |--------------------------------------------------------------------------
 */
-Route::get('/login',    [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login',   [AuthController::class, 'login']);
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('/register',[AuthController::class, 'register']);
+Route::post('/register', [AuthController::class, 'register']);
 
-Route::post('/logout',  [AuthController::class, 'logout'])->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

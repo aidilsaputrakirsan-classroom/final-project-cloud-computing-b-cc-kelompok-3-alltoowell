@@ -16,13 +16,18 @@ class HomeController extends Controller
 
     public function index(): View
     {
+        // Ambil data kamar dari Supabase
         $rooms = $this->supabase->getAllRooms();
 
+        // Hitung total kamar
         $totalRooms = count($rooms);
-        $availableRooms = count(array_filter($rooms, fn($r) =>
-            empty($r['status']) || $r['status'] !== 'occupied'
-        ));
 
+        // Hitung kamar yang tersedia
+        $availableRooms = count(array_filter($rooms, function ($r) {
+            return empty($r['status']) || $r['status'] !== 'occupied';
+        }));
+
+        // Kirim ke view
         return view('home.index', compact('rooms', 'totalRooms', 'availableRooms'));
     }
 }

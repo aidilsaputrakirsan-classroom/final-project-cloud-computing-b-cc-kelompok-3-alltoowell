@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name', 100);
             $table->integer('price');
             $table->text('description')->nullable();
-            $table->jsonb('facilities')->default('[]');
+            $table->text('facilities')->nullable();
             $table->integer('capacity')->default(1);
             $table->text('image')->nullable();
             $table->string('status', 20)->default('available')

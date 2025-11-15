@@ -5,23 +5,23 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class RoomController extends Controller
 {
     private $supabaseUrl;
     private $supabaseKey;
-    private $table;
+    private $table = 'rooms';
 
     public function __construct()
     {
         $this->supabaseUrl = rtrim(env('SUPABASE_URL'), '/');
         $this->supabaseKey = env('SUPABASE_KEY');
-        $this->table = 'rooms';
     }
 
-    /**
-     * Menampilkan semua kamar
-     */
+    // ========================
+    // INDEX - tampil semua kamar
+    // ========================
     public function index()
     {
         try {
@@ -35,24 +35,31 @@ class RoomController extends Controller
             }
 
             $rooms = $response->json();
-            return view('admin.rooms.index', compact('rooms'));
 
+            // convert facilities dari JSON string ke array
+            foreach ($rooms as &$room) {
+                if (!empty($room['facilities']) && is_string($room['facilities'])) {
+                    $room['facilities'] = json_decode($room['facilities'], true);
+                }
+            }
+
+            return view('admin.rooms.index', compact('rooms'));
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan koneksi: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Form tambah kamar
-     */
+    // ========================
+    // CREATE - form tambah kamar
+    // ========================
     public function create()
     {
         return view('admin.rooms.create');
     }
 
-    /**
-     * Simpan kamar baru
-     */
+    // ========================
+    // STORE - simpan kamar baru
+    // ========================
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -63,14 +70,33 @@ class RoomController extends Controller
             'description' => 'nullable|string',
             'facilities' => 'nullable|string',
             'location' => 'nullable|string',
-            'image' => 'nullable|string',
+            'image' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Ubah fasilitas menjadi JSON (kalau dikirim sebagai teks)
-        if (!empty($validated['facilities']) && is_string($validated['facilities'])) {
-            $validated['facilities'] = json_decode($validated['facilities'], true);
+        // =====================
+        // Upload gambar LOKAL
+        // =====================
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/rooms', $filename);
+
+            // simpan NAMA FILE saja, bukan /storage/rooms/...
+            $validated['image'] = $filename;
+        } else {
+            $validated['image'] = null;
         }
 
+        // Konversi facilities string ke JSON array
+        if (!empty($validated['facilities'])) {
+            $validated['facilities'] = json_encode(
+                array_map('trim', explode(',', $validated['facilities']))
+            );
+        }
+
+        // =====================
+        // Simpan ke Supabase
+        // =====================
         try {
             $response = Http::withHeaders([
                 'apikey' => $this->supabaseKey,
@@ -84,15 +110,14 @@ class RoomController extends Controller
             }
 
             return redirect()->route('admin.rooms.index')->with('success', 'Kamar berhasil ditambahkan.');
-
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan koneksi: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Form edit kamar
-     */
+    // ========================
+    // EDIT
+    // ========================
     public function edit($id)
     {
         try {
@@ -106,16 +131,20 @@ class RoomController extends Controller
             }
 
             $room = $response->json()[0];
-            return view('admin.rooms.edit', compact('room'));
 
+            if (!empty($room['facilities']) && is_string($room['facilities'])) {
+                $room['facilities'] = json_decode($room['facilities'], true);
+            }
+
+            return view('admin.rooms.edit', compact('room'));
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan koneksi: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Update kamar
-     */
+    // ========================
+    // UPDATE
+    // ========================
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
@@ -126,11 +155,23 @@ class RoomController extends Controller
             'description' => 'nullable|string',
             'facilities' => 'nullable|string',
             'location' => 'nullable|string',
-            'image' => 'nullable|string',
+            'image' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        if (!empty($validated['facilities']) && is_string($validated['facilities'])) {
-            $validated['facilities'] = json_decode($validated['facilities'], true);
+        // Upload gambar baru jika ada
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/rooms', $filename);
+            $validated['image'] = $filename;
+        } else {
+            unset($validated['image']); // jangan update kolom image
+        }
+
+        if (!empty($validated['facilities'])) {
+            $validated['facilities'] = json_encode(
+                array_map('trim', explode(',', $validated['facilities']))
+            );
         }
 
         try {
@@ -145,15 +186,14 @@ class RoomController extends Controller
             }
 
             return redirect()->route('admin.rooms.index')->with('success', 'Kamar berhasil diperbarui.');
-
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan koneksi: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Hapus kamar
-     */
+    // ========================
+    // DESTROY
+    // ========================
     public function destroy($id)
     {
         try {
@@ -167,7 +207,6 @@ class RoomController extends Controller
             }
 
             return redirect()->route('admin.rooms.index')->with('success', 'Kamar berhasil dihapus.');
-
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan koneksi: ' . $e->getMessage());
         }

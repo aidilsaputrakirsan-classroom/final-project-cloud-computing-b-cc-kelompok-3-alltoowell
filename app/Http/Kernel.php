@@ -2,29 +2,35 @@
 
 namespace App\Http;
 
-use Illuminate\Foundation\Http\Kernel as HttpKernel;
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
 
-class Kernel extends HttpKernel
+class Kernel
 {
-    /**
-     * The application's global HTTP middleware stack.
-     */
-    protected $middleware = [
-        \App\Http\Middleware\TrustHosts::class,
-        \App\Http\Middleware\TrustProxies::class,
-        \Illuminate\Http\Middleware\HandleCors::class,
-        \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
-        \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
-        \App\Http\Middleware\TrimStrings::class,
-        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-    ];
+    public function __construct(
+        protected Application $app,
+        protected Middleware $middleware,
+        protected Exceptions $exceptions
+    ) {
+        $this->registerRouteMiddleware();
+    }
 
     /**
-     * The application's route middleware.
+     * REGISTER ROUTE MIDDLEWARE
      */
-    protected $routeMiddleware = [
-        'auth' => \App\Http\Middleware\Authenticate::class,
-        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'role' => \App\Http\Middleware\Role::class, // middleware kustom
-    ];
+    protected function registerRouteMiddleware(): void
+    {
+        $this->middleware->alias('role', \App\Http\Middleware\RoleMiddleware::class);
+    }
+
+    public function middleware(): void
+    {
+        //
+    }
+
+    public function bootstrap(): void
+    {
+        //
+    }
 }

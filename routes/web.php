@@ -1,15 +1,42 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
+// AUTH & USER CONTROLLERS
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\BookingController;
 
-// ================== Route Home ==================
+// ADMIN CONTROLLERS
+use App\Http\Controllers\Admin\RoomController as AdminRoomController;
+
+// USER ROOM CONTROLLER
+use App\Http\Controllers\RoomController as UserRoomController;
+
+
+/* ============================================================
+|                           HOME
+============================================================ */
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// ================== Route Booking ==================
+
+/* ============================================================
+|                  USER – LIST & DETAIL ROOMS
+|     (untuk user dan publik melihat daftar & detail kamar)
+============================================================ */
+
+// daftar kamar
+Route::get('/rooms', [UserRoomController::class, 'index'])
+    ->name('rooms.list');
+
+// detail kamar — FIX: Hapus whereNumber karena ID Supabase == UUID
+Route::get('/rooms/{id}', [UserRoomController::class, 'show'])
+    ->name('rooms.show');
+
+
+/* ============================================================
+|                       BOOKING (PUBLIC)
+============================================================ */
 Route::get('/booking/{roomCode}', [BookingController::class, 'show'])
     ->where('roomCode', 'room[0-9]+')
     ->name('booking.show');
@@ -18,41 +45,54 @@ Route::post('/booking/{roomCode}', [BookingController::class, 'store'])
     ->where('roomCode', 'room[0-9]+')
     ->name('booking.store');
 
-// ================== Route Admin ==================
+
+/* ============================================================
+|                      ADMIN ROUTES
+|              (Hanya admin yang boleh akses)
+============================================================ */
 Route::prefix('admin')
     ->name('admin.')
+    ->middleware(['role:admin'])
     ->group(function () {
 
-        // Halaman daftar kamar
-        Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
+        // Dashboard Admin
+        Route::get('/', [BookingController::class, 'index'])
+            ->name('dashboard');
 
-        // Form tambah kamar
-        Route::get('/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
-        Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
+        // CRUD kamar
+        Route::get('/rooms',           [AdminRoomController::class, 'index'])->name('rooms.index');
+        Route::get('/rooms/create',    [AdminRoomController::class, 'create'])->name('rooms.create');
+        Route::post('/rooms',          [AdminRoomController::class, 'store'])->name('rooms.store');
+        Route::get('/rooms/{id}/edit', [AdminRoomController::class, 'edit'])->name('rooms.edit');
+        Route::put('/rooms/{id}',      [AdminRoomController::class, 'update'])->name('rooms.update');
+        Route::delete('/rooms/{id}',   [AdminRoomController::class, 'destroy'])->name('rooms.destroy');
 
-        // Edit & update kamar
-        Route::get('/rooms/{id}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
-        Route::put('/rooms/{id}', [RoomController::class, 'update'])->name('rooms.update');
-
-        // Hapus kamar
-        Route::delete('/rooms/{id}', [RoomController::class, 'destroy'])->name('rooms.destroy');
-
-        // Halaman admin untuk booking (tambahan dari HEAD)
-        Route::get('/', [BookingController::class, 'index'])->name('dashboard');
-        Route::patch('/{id}', [BookingController::class, 'update']);
-        Route::delete('/{id}', [BookingController::class, 'destroy']);
+        // Update status booking admin
+        Route::patch('/{id}',  [BookingController::class, 'update'])->name('booking.update');
+        Route::delete('/{id}', [BookingController::class, 'destroy'])->name('booking.destroy');
     });
 
-// ================== Auth Routes ==================
 
-// Menampilkan halaman login
-Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
-// Proses login
-Route::post('login', [AuthController::class, 'login']);
-// Logout
-Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+/* ============================================================
+|                         USER DASHBOARD
+============================================================ */
+Route::prefix('user')
+    ->name('user.')
+    ->middleware(['role:user'])
+    ->group(function () {
+        Route::get('/dashboard', function () {
+            return view('user.dashboard');
+        })->name('dashboard');
+    });
 
-// Menampilkan halaman register
+
+/* ============================================================
+|                           AUTH
+============================================================ */
+Route::get('login',    [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('login',   [AuthController::class, 'login']);
+
 Route::get('register', [AuthController::class, 'showRegisterForm'])->name('register');
-// Proses register
-Route::post('register', [AuthController::class, 'register']);
+Route::post('register',[AuthController::class, 'register']);
+
+Route::post('logout',  [AuthController::class, 'logout'])->name('logout');

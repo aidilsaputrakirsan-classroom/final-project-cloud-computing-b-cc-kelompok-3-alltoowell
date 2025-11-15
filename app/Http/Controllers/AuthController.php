@@ -14,23 +14,20 @@ class AuthController extends Controller
 
     public function __construct()
     {
-        $this->supabaseUrl = env('SUPABASE_URL');
-        $this->supabaseKey = env('SUPABASE_KEY');
+        $this->supabaseUrl = rtrim(config('services.supabase.url'), '/');
+        $this->supabaseKey = config('services.supabase.key');
     }
 
-    // 🟢 Menampilkan halaman login
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    // 🟢 Menampilkan halaman register
     public function showRegisterForm()
     {
         return view('auth.register');
     }
 
-    // 🟢 Registrasi user baru
     public function register(Request $request)
     {
         $request->validate([
@@ -63,7 +60,6 @@ class AuthController extends Controller
         return redirect('/login')->with('success', 'Registrasi berhasil! Silakan login.');
     }
 
-    // 🔵 Proses login
     public function login(Request $request)
     {
         $request->validate([
@@ -86,6 +82,7 @@ class AuthController extends Controller
         }
 
         $users = $response->json();
+
         if (empty($users)) {
             throw ValidationException::withMessages(['email' => 'Email tidak ditemukan.']);
         }
@@ -109,7 +106,6 @@ class AuthController extends Controller
         );
     }
 
-    // 🔴 Logout user
     public function logout(Request $request)
     {
         $request->session()->flush();

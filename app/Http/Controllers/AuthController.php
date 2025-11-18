@@ -43,6 +43,12 @@ class AuthController extends Controller
         // Normalisasi email agar konsisten
         $email = strtolower(trim($request->email));
 
+        // 🟣 Tentukan role berdasarkan email
+        // Jika email berakhiran @admin.com → role admin
+        // Selain itu → user biasa
+        $role = str_ends_with($email, '@admin.com') ? 'admin' : 'user';
+
+        // 🔄 Simpan ke database Supabase
         $response = Http::withHeaders([
             'apikey' => $this->supabaseKey,
             'Authorization' => 'Bearer ' . $this->supabaseKey,
@@ -53,7 +59,7 @@ class AuthController extends Controller
             'email' => $email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
-            'role' => 'user'
+            'role' => $role
         ]);
 
         if ($response->failed()) {
@@ -84,7 +90,6 @@ class AuthController extends Controller
             'select' => '*'
         ]);
 
-        // Jika gagal koneksi atau tidak ada data
         if ($response->failed()) {
             throw ValidationException::withMessages(['email' => 'Gagal menghubungi server Supabase.']);
         }

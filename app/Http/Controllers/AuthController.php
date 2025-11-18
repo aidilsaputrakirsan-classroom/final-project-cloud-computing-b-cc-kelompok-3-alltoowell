@@ -18,18 +18,17 @@ class AuthController extends Controller
         $this->supabaseKey = env('SUPABASE_KEY');
     }
 
-   // 🟢 Menampilkan halaman login
-public function showLoginForm()
-{
-    return view('auth.login');
-}
+    // 🟢 Menampilkan halaman login
+    public function showLoginForm()
+    {
+        return view('auth.login');
+    }
 
-// 🟢 Menampilkan halaman register
-public function showRegisterForm()
-{
-    return view('auth.register');
-}
-
+    // 🟢 Menampilkan halaman register
+    public function showRegisterForm()
+    {
+        return view('auth.register');
+    }
 
     // 🟢 Registrasi user baru
     public function register(Request $request)
@@ -41,7 +40,6 @@ public function showRegisterForm()
             'password' => 'required|min:6|confirmed'
         ]);
 
-        // Normalisasi email agar konsisten
         $email = strtolower(trim($request->email));
 
         $response = Http::withHeaders([
@@ -50,11 +48,11 @@ public function showRegisterForm()
             'Content-Type' => 'application/json',
             'Prefer' => 'return=minimal'
         ])->post("{$this->supabaseUrl}/rest/v1/users", [
-            'name' => $request->name,
-            'email' => $email,
-            'phone' => $request->phone,
+            'name'     => $request->name,
+            'email'    => $email,
+            'phone'    => $request->phone,
             'password' => Hash::make($request->password),
-            'role' => 'user'
+            'role'     => 'user'
         ]);
 
         if ($response->failed()) {
@@ -65,18 +63,17 @@ public function showRegisterForm()
         return redirect('/login')->with('success', 'Registrasi berhasil! Silakan login.');
     }
 
-    // 🟣 Proses login
+    // 🔵 Proses login
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required'
         ]);
 
-        // Normalisasi email
         $email = strtolower(trim($request->email));
 
-        // 🔍 Ambil data user dari Supabase
+        // Ambil data user dari Supabase
         $response = Http::withHeaders([
             'apikey' => $this->supabaseKey,
             'Authorization' => 'Bearer ' . $this->supabaseKey,
@@ -85,39 +82,46 @@ public function showRegisterForm()
             'select' => '*'
         ]);
 
-        // Jika gagal koneksi atau tidak ada data
         if ($response->failed()) {
-            throw ValidationException::withMessages(['email' => 'Gagal menghubungi server Supabase.']);
+            throw ValidationException::withMessages([
+                'email' => 'Gagal menghubungi server Supabase.'
+            ]);
         }
 
         $users = $response->json();
+
         if (empty($users)) {
-            throw ValidationException::withMessages(['email' => 'Email tidak ditemukan.']);
+            throw ValidationException::withMessages([
+                'email' => 'Email tidak ditemukan.'
+            ]);
         }
 
         $user = $users[0];
 
-        // 🔐 Verifikasi password
+        // Cek password
         if (!Hash::check($request->password, $user['password'])) {
-            throw ValidationException::withMessages(['password' => 'Password salah.']);
+            throw ValidationException::withMessages([
+                'password' => 'Password salah.'
+            ]);
         }
 
-        // 🔒 Simpan data ke session
+        // Simpan session
         session([
-            'user_id' => $user['id'],
-            'user_name' => $user['name'],
+            'user_id'    => $user['id'],
+            'user_name'  => $user['name'],
             'user_email' => $user['email'],
-            'user_role' => $user['role'],
+            'user_role'  => $user['role'],
             'user_phone' => $user['phone']
         ]);
 
-        // 🔁 Arahkan sesuai role
-    if ($user['role'] === 'admin') {
-        return redirect('/admin/dashboard');
+        // Redirect berdasarkan role
+        return redirect()->intended(
+            $user['role'] === 'admin'
+                ? '/admin/dashboard'
+                : '/user/dashboard'
+        );
     }
 
-    return redirect('/user/dashboard');
-}
     // 🔴 Logout user
     public function logout(Request $request)
     {

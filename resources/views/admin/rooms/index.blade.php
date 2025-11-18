@@ -61,7 +61,8 @@
                     </td>
 
                     <td class="px-4 py-2">
-                        <form action="{{ route('admin.rooms.updateStatus', $b['id']) }}" method="POST" class="flex gap-2">
+                        <form action="{{ route('admin.rooms.updateStatus', $b['id']) }}" 
+                              method="POST" class="flex gap-2">
                             @csrf
 
                             <select name="status" class="border rounded px-2 py-1 text-sm">
@@ -76,14 +77,13 @@
                         </form>
                     </td>
                 </tr>
-                @empty
 
+                @empty
                 <tr>
                     <td colspan="8" class="px-4 py-6 text-center text-gray-500">
                         Belum ada data booking.
                     </td>
                 </tr>
-
                 @endforelse
 
             </tbody>
@@ -91,6 +91,5 @@
         </table>
 
     </div>
-
 </div>
 @endsection

@@ -3,53 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
-    @vite('resources/css/app.css')
+    <title>Admin - @yield('title', 'Dashboard')</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+
 <body class="bg-gray-100">
 
-    <div class="flex">
+    {{-- NAVBAR HORIZONTAL --}}
+    <header class="bg-white shadow sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 
-        {{-- SIDEBAR --}}
-        <aside class="w-64 h-screen bg-gray-900 text-white fixed">
-            <div class="p-6 text-xl font-bold border-b border-gray-700">
-                Admin Panel
+            {{-- LOGO --}}
+            <div class="text-xl font-bold text-gray-800">
+                SI-KOST Admin
             </div>
 
-            <nav class="mt-6 space-y-2">
-                <a href="/admin/dashboard"
-                    class="block px-6 py-3 hover:bg-gray-700 transition">
+            {{-- MENU --}}
+            <nav class="flex items-center gap-6 font-medium">
+
+                <a href="{{ route('admin.dashboard') }}"
+                    class="hover:text-blue-600 {{ request()->routeIs('admin.dashboard') ? 'text-blue-600 font-semibold' : '' }}">
                     Dashboard
                 </a>
 
-                <a href="/admin/pengguna"
-                    class="block px-6 py-3 hover:bg-gray-700 transition">
-                    Data Pengguna
-                </a>
+<a href="{{ route('admin.rooms.index') }}"
+    class="hover:text-blue-600 {{ request()->routeIs('admin.rooms*') ? 'text-blue-600 font-semibold' : '' }}">
+    Kelola Kamar
+</a>
 
-                <a href="/admin/kamar"
-                    class="block px-6 py-3 hover:bg-gray-700 transition">
-                    Data Kamar
-                </a>
 
-                <a href="/admin/booking"
-                    class="block px-6 py-3 hover:bg-gray-700 transition">
-                    Booking
-                </a>
-
-                <a href="/logout"
-                    class="block px-6 py-3 text-red-400 hover:bg-red-600 hover:text-white transition">
-                    Logout
-                </a>
             </nav>
-        </aside>
 
-        {{-- MAIN CONTENT --}}
-        <main class="ml-64 w-full p-8">
-            @yield('content')
-        </main>
+            {{-- LOGOUT --}}
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    Keluar
+                </button>
+            </form>
 
-    </div>
+        </div>
+    </header>
+
+    {{-- MAIN CONTENT --}}
+    <main class="px-6 py-6 max-w-7xl mx-auto">
+        @yield('content')
+    </main>
+
+        @yield('scripts')
+
 
 </body>
+
 </html>

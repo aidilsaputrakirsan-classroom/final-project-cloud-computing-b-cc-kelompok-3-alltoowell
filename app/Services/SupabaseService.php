@@ -13,15 +13,14 @@ class SupabaseService
 
     public function __construct()
     {
-        // TARIK LANGSUNG DARI .env (bekerja 100%)
         $this->url = rtrim(env('SUPABASE_URL'), '/');
         $this->key = env('SUPABASE_KEY');
 
         $this->headers = [
-            'apikey' => $this->key,
-            'Authorization' => 'Bearer ' . $this->key,
-            'Content-Type' => 'application/json',
-            'Prefer' => 'return=representation'
+            'apikey'            => $this->key,
+            'Authorization'     => 'Bearer ' . $this->key,
+            'Content-Type'      => 'application/json',
+            'Prefer'            => 'return=representation'
         ];
     }
 
@@ -30,17 +29,18 @@ class SupabaseService
         $response = Http::withHeaders($this->headers)
             ->get("{$this->url}/rest/v1/rooms", [
                 'select' => '*',
-                'order' => 'created_at.desc'
+                'order'  => 'created_at.desc'
             ]);
 
         return $response->successful() ? $response->json() : [];
     }
 
-    public function getRoomByNumber($number)
+    public function getAllBookingsSimple()
     {
         $response = Http::withHeaders($this->headers)
-            ->get("{$this->url}/rest/v1/rooms", [
-                'room_number' => "eq.{$number}"
+            ->get("{$this->url}/rest/v1/bookings", [
+                'select' => '*',
+                'order'  => 'created_at.desc'
             ]);
 
         return $response->successful() ? $response->json() : [];
@@ -58,17 +58,6 @@ class SupabaseService
         return $response;
     }
 
-    public function getAllBookingsWithRoom()
-    {
-        $response = Http::withHeaders($this->headers)
-            ->get("{$this->url}/rest/v1/bookings", [
-                'select' => '*, room:rooms(name, price, location, image, room_number)',
-                'order' => 'created_at.desc'
-            ]);
-
-        return $response->successful() ? $response->json() : [];
-    }
-
     public function updateBookingStatus($id, $status)
     {
         $response = Http::withHeaders($this->headers)
@@ -83,6 +72,8 @@ class SupabaseService
         return $response;
     }
 
+    
+
     public function deleteBooking($id)
     {
         $response = Http::withHeaders($this->headers)
@@ -94,24 +85,6 @@ class SupabaseService
 
         return $response;
     }
-
-    public function getBookingCount()
-    {
-        $response = Http::withHeaders($this->headers)
-            ->get("{$this->url}/rest/v1/bookings", [
-                'select' => 'id'
-            ]);
-
-        if ($response->failed()) {
-            return 0;
-        }
-
-        $range = $response->header('Content-Range');
-
-        if ($range && preg_match('/\/(\d+)$/', $range, $matches)) {
-            return (int) $matches[1];
-        }
-
-        return count($response->json());
-    }
 }
+
+

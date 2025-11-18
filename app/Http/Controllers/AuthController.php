@@ -18,17 +18,18 @@ class AuthController extends Controller
         $this->supabaseKey = env('SUPABASE_KEY');
     }
 
-    // 🟢 Menampilkan halaman login
-    public function showLogin()
-    {
-        return view('auth.login');
-    }
+   // 🟢 Menampilkan halaman login
+public function showLoginForm()
+{
+    return view('auth.login');
+}
 
-    // 🟢 Menampilkan halaman register
-    public function showRegister()
-    {
-        return view('auth.register');
-    }
+// 🟢 Menampilkan halaman register
+public function showRegisterForm()
+{
+    return view('auth.register');
+}
+
 
     // 🟢 Registrasi user baru
     public function register(Request $request)
@@ -111,13 +112,12 @@ class AuthController extends Controller
         ]);
 
         // 🔁 Arahkan sesuai role
-        return redirect()->intended(
-            $user['role'] === 'admin'
-                ? '/admin/dashboard'
-                : '/user/dashboard'
-        );
+    if ($user['role'] === 'admin') {
+        return redirect('/admin/dashboard');
     }
 
+    return redirect('/user/dashboard');
+}
     // 🔴 Logout user
     public function logout(Request $request)
     {

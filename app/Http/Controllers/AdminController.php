@@ -2,25 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Kamar;
-use App\Models\Booking;
-use App\Models\Pengguna;
-use Illuminate\Http\Request;
+use App\Services\SupabaseService;
 
 class AdminController extends Controller
 {
+    protected $supabase;
+
+    public function __construct(SupabaseService $supabase)
+    {
+        $this->supabase = $supabase;
+    }
+
     public function dashboard()
     {
-        $totalKamar = Kamar::count();
-        $kamarAvailable = Kamar::where('status', 1)->count(); // 1 = Available
-        $kamarUnavailable = Kamar::where('status', 0)->count(); // 0 = Unavailable
-        $totalBooking = Booking::count();
+        $rooms = $this->supabase->getAllRooms();
+        $bookings = $this->supabase->getAllBookingsWithRoom();
+        $totalBookings = $this->supabase->getBookingCount();
 
         return view('admin.dashboard', compact(
-            'totalKamar',
-            'kamarAvailable',
-            'kamarUnavailable',
-            'totalBooking'
+            'rooms',
+            'bookings',
+            'totalBookings'
         ));
     }
 }

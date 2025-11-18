@@ -2,22 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 
-// =======================
-// AUTH & USER
-// =======================
+// USER CONTROLLERS
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\RoomController;
 
-// =======================
-// ADMIN CONTROLLERS BARU
-// =======================
-use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\PenggunaController;
-use App\Http\Controllers\Admin\BookingController as AdminBookingController;
-use App\Http\Controllers\Admin\RoomController as AdminRoomController;
+// ADMIN CONTROLLERS
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PenggunaController;
+use App\Http\Controllers\Admin\BookingManagementController;
+use App\Http\Controllers\Admin\RoomController as AdminRoomController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,15 +22,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 /*
 |--------------------------------------------------------------------------
-| USER ROOM LIST + DETAIL
-|--------------------------------------------------------------------------
-*/
-Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.list');
-Route::get('/rooms/{id}', [RoomController::class, 'show'])->whereNumber('id')->name('rooms.show');
-
-/*
-|--------------------------------------------------------------------------
-| BOOKING USER
+| USER BOOKING
 |--------------------------------------------------------------------------
 */
 Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
@@ -44,46 +30,31 @@ Route::post('/booking/{id}', [BookingController::class, 'store'])->name('booking
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN (role:admin)
+| ADMIN (Dashboard, Kelola Booking, Pengguna)
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')
-    ->middleware(['role:admin'])
     ->name('admin.')
     ->group(function () {
-        
+
+        // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        // CRUD Kamar
-        Route::get('/rooms', [AdminRoomController::class, 'index'])->name('rooms.index');
-        Route::get('/rooms/create', [AdminRoomController::class, 'create'])->name('rooms.create');
-        Route::post('/rooms', [AdminRoomController::class, 'store'])->name('rooms.store');
-        Route::get('/rooms/{id}/edit', [AdminRoomController::class, 'edit'])->name('rooms.edit');
-        Route::put('/rooms/{id}', [AdminRoomController::class, 'update'])->name('rooms.update');
-        Route::delete('/rooms/{id}', [AdminRoomController::class, 'destroy'])->name('rooms.destroy');
+        /*
+        |----------------------------------------------------------------------
+        | K E L O L A  B O O K I N G  di /admin/rooms
+        |----------------------------------------------------------------------
+        */
+
+        Route::get('/rooms', [BookingManagementController::class, 'index'])
+            ->name('rooms.index');
+
+        Route::post('/rooms/{id}/status', [BookingManagementController::class, 'updateStatus'])
+            ->name('rooms.updateStatus');
 
         // Pengguna
         Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna.index');
         Route::put('/pengguna/{id}', [PenggunaController::class, 'update'])->name('pengguna.update');
-
-        // Booking
-        Route::get('/booking', [AdminBookingController::class, 'index'])->name('booking.index');
-        Route::patch('/booking/{id}', [AdminBookingController::class, 'update'])->name('booking.update');
-        Route::delete('/booking/{id}', [AdminBookingController::class, 'destroy'])->name('booking.destroy');
-    });
-
-/*
-|--------------------------------------------------------------------------
-| USER DASHBOARD (role:user)
-|--------------------------------------------------------------------------
-*/
-Route::prefix('user')
-    ->middleware(['role:user'])
-    ->name('user.')
-    ->group(function () {
-        Route::get('/dashboard', function () {
-            return view('user.dashboard');
-        })->name('dashboard');
     });
 
 /*

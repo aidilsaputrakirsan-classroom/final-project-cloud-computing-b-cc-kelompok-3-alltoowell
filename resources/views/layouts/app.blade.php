@@ -3,26 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>KOST-SI - @yield('title', 'Sistem Manajemen Kamar')</title>
 
-    {{-- Integrasi Tailwind & Lucide untuk ikon dan styling cepat --}}
+    {{-- Integrasi Tailwind & Lucide --}}
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+
     <script>
         tailwind.config = {
-            theme: { extend: { colors: { primary: '#5B4FE3' } } }
+            theme: {
+                extend: {
+                    colors: { primary: '#5B4FE3' }
+                }
+            }
         }
     </script>
 
-    {{-- Tambahan Vite untuk asset Laravel modern --}}
+    {{-- Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-50 text-gray-800">
 
-    {{-- Navbar --}}
+<body class="min-h-screen bg-gray-50 text-gray-800">
+
+    {{-- NAVBAR (HEAD VERSION) --}}
     @include('components.navbar')
 
-    {{-- Notifikasi (gabungan Toast + Alpine) --}}
+    {{-- NOTIFIKASI (Alpine + session) --}}
     <div
         x-data="{ show: @json(session('success') || session('error')), message: '{{ session('success') ?? session('error') }}' }"
         x-show="show"
@@ -38,7 +45,7 @@
         <p x-text="message"></p>
     </div>
 
-    {{-- Toast custom (dari versi HEAD) --}}
+    {{-- TOAST CUSTOM --}}
     <div id="toast" class="fixed bottom-4 right-4 bg-white border rounded-lg shadow-lg p-4 translate-y-20 transition-transform z-50 hidden">
         <div class="flex items-center gap-3">
             <div id="toast-icon"></div>
@@ -46,30 +53,33 @@
         </div>
     </div>
 
-    {{-- Konten utama --}}
+    {{-- MAIN CONTENT (HEAD VERSION) --}}
     <main class="min-h-screen container mx-auto py-8 px-4">
         @yield('content')
     </main>
 
+    {{-- ICON INIT + TOAST SCRIPT --}}
     <script>
         document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
 
-        // Fitur toast custom (versi HEAD)
         @if(session('toast'))
             showToast("{{ session('toast') }}", 'success');
         @endif
 
         function showToast(msg, type = 'success') {
             const t = document.getElementById('toast'),
-                m = document.getElementById('toast-message'),
-                i = document.getElementById('toast-icon');
+                  m = document.getElementById('toast-message'),
+                  i = document.getElementById('toast-icon');
+
             m.textContent = msg;
             i.innerHTML = type === 'success'
                 ? '<i data-lucide="check-circle-2" class="w-5 h-5 text-green-500"></i>'
                 : '<i data-lucide="x-circle" class="w-5 h-5 text-red-500"></i>';
+
             t.classList.remove('hidden');
             t.style.transform = 'translateY(0)';
             lucide.createIcons();
+
             setTimeout(() => {
                 t.style.transform = 'translateY(200px)';
                 setTimeout(() => t.classList.add('hidden'), 300);

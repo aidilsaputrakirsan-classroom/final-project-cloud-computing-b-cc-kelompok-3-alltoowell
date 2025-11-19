@@ -1,81 +1,89 @@
-@props(['room' => null, 'action', 'method' => 'POST', 'buttonText' => 'Simpan'])
+<div class="mb-4">
+    <label class="block mb-1 font-semibold">Nama Kamar</label>
+    <input type="text" name="name" class="w-full border px-3 py-2 rounded" value="{{ old('name', $room['name'] ?? '') }}">
+</div>
 
-<form action="{{ $action }}" method="POST" class="bg-white p-6 rounded-lg shadow">
-    @csrf
-    @if($method !== 'POST')
-        @method($method)
-    @endif
+<div class="mb-4">
+    <label class="block mb-1 font-semibold">Harga</label>
+    <input type="number" name="price" class="w-full border px-3 py-2 rounded" value="{{ old('price', $room['price'] ?? '') }}">
+</div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="mb-4">
+    <label class="block mb-1 font-semibold">Kapasitas</label>
+    <input type="number" name="capacity" class="w-full border px-3 py-2 rounded" value="{{ old('capacity', $room['capacity'] ?? '') }}">
+</div>
 
-        {{-- Nama Kamar --}}
-        <div>
-            <label for="name" class="block text-gray-700 font-semibold mb-1">Nama Kamar</label>
-            <input type="text" name="name" id="name"
-                value="{{ old('name', $room['name'] ?? '') }}"
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-[#5B3FE0] focus:border-[#5B3FE0]">
-        </div>
+<div class="mb-4">
+    <label class="block mb-1 font-semibold">Status</label>
+    <select name="status" class="w-full border px-3 py-2 rounded">
+        <option value="available" {{ (old('status', $room['status'] ?? '') == 'available') ? 'selected' : '' }}>Available</option>
+        <option value="unavailable" {{ (old('status', $room['status'] ?? '') == 'unavailable') ? 'selected' : '' }}>Unavailable</option>
+    </select>
+</div>
 
-        {{-- Harga --}}
-        <div>
-            <label for="price" class="block text-gray-700 font-semibold mb-1">Harga</label>
-            <input type="number" name="price" id="price"
-                value="{{ old('price', $room['price'] ?? '') }}"
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-[#5B3FE0] focus:border-[#5B3FE0]">
-        </div>
+<div class="mb-4">
+    <label class="block mb-1 font-semibold">Fasilitas (pisahkan dengan koma)</label>
+    <input type="text" name="facilities" class="w-full border px-3 py-2 rounded" value="{{ old('facilities', isset($room['facilities']) ? (is_array($room['facilities']) ? implode(', ', $room['facilities']) : $room['facilities']) : '') }}">
+</div>
 
-        {{-- Kapasitas --}}
-        <div>
-            <label for="capacity" class="block text-gray-700 font-semibold mb-1">Kapasitas</label>
-            <input type="number" name="capacity" id="capacity"
-                value="{{ old('capacity', $room['capacity'] ?? '') }}"
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-[#5B3FE0] focus:border-[#5B3FE0]">
-        </div>
+<div class="mb-4">
+    <label class="block mb-1 font-semibold">Lokasi</label>
+    <input type="text" name="location" class="w-full border px-3 py-2 rounded" value="{{ old('location', $room['location'] ?? '') }}">
+</div>
 
-        {{-- Status --}}
-        <div>
-            <label for="status" class="block text-gray-700 font-semibold mb-1">Status</label>
-            <select name="status" id="status"
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-[#5B3FE0] focus:border-[#5B3FE0]">
-                <option value="available" {{ old('status', $room['status'] ?? '') == 'available' ? 'selected' : '' }}>Tersedia</option>
-                <option value="unavailable" {{ old('status', $room['status'] ?? '') == 'unavailable' ? 'selected' : '' }}>Tidak Tersedia</option>
-            </select>
-        </div>
+{{-- Upload file --}}
+<div class="mb-4">
+    <label class="block mb-1 font-semibold">Upload Gambar</label>
+    <input type="file" name="image" id="imageInput" class="border px-3 py-2 rounded">
+</div>
 
-        {{-- Deskripsi --}}
-        <div class="md:col-span-2">
-            <label for="description" class="block text-gray-700 font-semibold mb-1">Deskripsi</label>
-            <textarea name="description" id="description" rows="3"
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-[#5B3FE0] focus:border-[#5B3FE0]">{{ old('description', $room['description'] ?? '') }}</textarea>
-        </div>
+{{-- URL publik --}}
+<div class="mb-4">
+    <label class="block mb-1 font-semibold">Atau Masukkan URL Gambar</label>
+    <input type="url" name="image_url" id="imageUrlInput" class="w-full border px-3 py-2 rounded" placeholder="https://example.com/image.png" value="{{ old('image_url', $room['image'] ?? '') }}">
+</div>
 
-        {{-- Fasilitas --}}
-        <div class="md:col-span-2">
-            <label for="facilities" class="block text-gray-700 font-semibold mb-1">Fasilitas (pisahkan dengan koma)</label>
-            <input type="text" name="facilities" id="facilities"
-                value="{{ old('facilities', 
-                    isset($room['facilities']) 
-                        ? (is_array($room['facilities']) 
-                            ? implode(', ', $room['facilities']) 
-                            : (is_string($room['facilities']) ? $room['facilities'] : '')
-                          ) 
-                        : ''
-                ) }}"
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-[#5B3FE0] focus:border-[#5B3FE0]">
-        </div>
-
-        {{-- Lokasi --}}
-        <div class="md:col-span-2">
-            <label for="location" class="block text-gray-700 font-semibold mb-1">Lokasi</label>
-            <input type="text" name="location" id="location"
-                value="{{ old('location', $room['location'] ?? '') }}"
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-[#5B3FE0] focus:border-[#5B3FE0]">
-        </div>
-
-        {{-- Tombol --}}
-        <div class="md:col-span-2 flex justify-end gap-2 mt-6">
-            <a href="{{ route('admin.rooms.index') }}" class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition">Batal</a>
-            <button type="submit" class="bg-[#5B3FE0] text-white px-4 py-2 rounded-lg hover:bg-[#4a32c9] transition">{{ $buttonText }}</button>
-        </div>
+{{-- Preview gambar --}}
+<div class="mb-4">
+    <label class="block mb-1 font-semibold">Preview Gambar</label>
+    <div id="previewContainer" class="w-48 h-32 border rounded flex items-center justify-center text-gray-400">
+        Preview akan muncul di sini
     </div>
-</form>
+</div>
+
+<script>
+    const imageInput = document.getElementById('imageInput');
+    const imageUrlInput = document.getElementById('imageUrlInput');
+    const previewContainer = document.getElementById('previewContainer');
+
+    function showPreview(src) {
+        previewContainer.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = src;
+        img.className = 'w-full h-full object-cover rounded';
+        previewContainer.appendChild(img);
+    }
+
+    imageInput.addEventListener('change', (e) => {
+        if(e.target.files && e.target.files[0]){
+            const reader = new FileReader();
+            reader.onload = function(event){
+                showPreview(event.target.result);
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    imageUrlInput.addEventListener('input', (e) => {
+        const url = e.target.value;
+        if(url){
+            showPreview(url);
+        } else if(!imageInput.files.length){
+            previewContainer.innerHTML = 'Preview akan muncul di sini';
+        }
+    });
+
+    @if(isset($room['image']) && $room['image'])
+        showPreview("{{ $room['image'] }}");
+    @endif
+</script>

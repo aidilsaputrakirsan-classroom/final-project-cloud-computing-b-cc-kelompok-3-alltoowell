@@ -16,7 +16,6 @@ use App\Http\Controllers\Admin\RoomController as AdminRoomController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\PenggunaController;
 
-
 /*
 |--------------------------------------------------------------------------
 | HOME (Halaman Utama)
@@ -27,11 +26,11 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 /*
 |--------------------------------------------------------------------------
-| USER – LIST & DETAIL ROOMS  ← YANG KEMARIN KURANG
+| USER – LIST & DETAIL ROOMS
 |--------------------------------------------------------------------------
 */
 
-// Daftar semua kamar (user)
+// Daftar kamar
 Route::get('/rooms', [RoomController::class, 'index'])
     ->name('rooms.list');
 
@@ -70,15 +69,16 @@ Route::prefix('admin')
         Route::put('/rooms/{id}', [AdminRoomController::class, 'update'])->name('rooms.update');
         Route::delete('/rooms/{id}', [AdminRoomController::class, 'destroy'])->name('rooms.destroy');
 
-        // Booking (admin)
+        // Booking admin
         Route::get('/booking', [AdminBookingController::class, 'index'])->name('booking.index');
         Route::patch('/booking/{id}', [AdminBookingController::class, 'update'])->name('booking.update');
         Route::delete('/booking/{id}', [AdminBookingController::class, 'destroy'])->name('booking.destroy');
 
-        // Kelola Pengguna
+        // Pengguna admin
         Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna.index');
         Route::put('/pengguna/{id}', [PenggunaController::class, 'update'])->name('pengguna.update');
     });
+
 
 
 /*
@@ -87,17 +87,10 @@ Route::prefix('admin')
 |--------------------------------------------------------------------------
 */
 
-// Form login
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-
-// Proses login
 Route::post('/login', [AuthController::class, 'login']);
 
-// Form register
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-
-// Proses register
 Route::post('/register', [AuthController::class, 'register']);
 
-// Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

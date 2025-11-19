@@ -31,25 +31,25 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:100',
-            'email' => 'required|email',
-            'phone' => 'required|string|min:10|max:15',
+            'name'     => 'required|string|max:100',
+            'email'    => 'required|email',
+            'phone'    => 'required|string|min:10|max:15',
             'password' => 'required|min:6|confirmed'
         ]);
 
         $email = strtolower(trim($request->email));
 
         $response = Http::withHeaders([
-            'apikey' => $this->supabaseKey,
+            'apikey'        => $this->supabaseKey,
             'Authorization' => 'Bearer ' . $this->supabaseKey,
-            'Content-Type' => 'application/json',
-            'Prefer' => 'return=minimal'
+            'Content-Type'  => 'application/json',
+            'Prefer'        => 'return=minimal'
         ])->post("{$this->supabaseUrl}/rest/v1/users", [
-            'name' => $request->name,
-            'email' => $email,
-            'phone' => $request->phone,
+            'name'     => $request->name,
+            'email'    => $email,
+            'phone'    => $request->phone,
             'password' => Hash::make($request->password),
-            'role' => 'user'
+            'role'     => 'user'
         ]);
 
         if ($response->failed()) {
@@ -63,54 +63,62 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required'
         ]);
 
         $email = strtolower(trim($request->email));
 
         $response = Http::withHeaders([
-            'apikey' => $this->supabaseKey,
+            'apikey'        => $this->supabaseKey,
             'Authorization' => 'Bearer ' . $this->supabaseKey,
         ])->get("{$this->supabaseUrl}/rest/v1/users", [
-            'email' => 'eq.' . $email,
+            'email'  => 'eq.' . $email,
             'select' => '*'
         ]);
 
         if ($response->failed()) {
-            throw ValidationException::withMessages(['email' => 'Gagal menghubungi server Supabase.']);
+            throw ValidationException::withMessages([
+                'email' => 'Gagal menghubungi server Supabase.'
+            ]);
         }
 
         $users = $response->json();
 
         if (empty($users)) {
-            throw ValidationException::withMessages(['email' => 'Email tidak ditemukan.']);
+            throw ValidationException::withMessages([
+                'email' => 'Email tidak ditemukan.'
+            ]);
         }
 
         $user = $users[0];
 
         if (!Hash::check($request->password, $user['password'])) {
-            throw ValidationException::withMessages(['password' => 'Password salah.']);
+            throw ValidationException::withMessages([
+                'password' => 'Password salah.'
+            ]);
         }
 
         session([
-            'user_id' => $user['id'],
-            'user_name' => $user['name'],
+            'user_id'    => $user['id'],
+            'user_name'  => $user['name'],
             'user_email' => $user['email'],
-            'user_role' => $user['role'],
+            'user_role'  => $user['role'],
             'user_phone' => $user['phone']
         ]);
 
-       return redirect()->intended(
-        $user['role'] === 'admin'
-        ? '/admin/dashboard'
-        : '/rooms'
+        // 🎯 Redirect FINAL yang kamu minta:
+        return redirect()->intended(
+            $user['role'] === 'admin'
+                ? '/admin/dashboard'
+                : '/rooms'
         );
     }
 
     public function logout(Request $request)
     {
         $request->session()->flush();
+
         return redirect('/')->with('success', 'Logout berhasil.');
     }
 }

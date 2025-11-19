@@ -59,7 +59,7 @@ class BookingController extends Controller
         $uuid       = (string) Str::uuid();
         $bookingId  = 'BK-' . strtoupper(Str::random(6));
 
-        // Data yang dikirim ke Supabase
+        // Data booking
         $payload = [
             'id'             => $uuid,
             'booking_id'     => $bookingId,
@@ -82,10 +82,7 @@ class BookingController extends Controller
             'Prefer'        => 'return=representation'
         ])->post("{$this->supabaseUrl}/rest/v1/bookings", $payload);
 
-        /**
-         * 🔥 DEBUG — SUPABASE ERROR AKAN MUNCUL DI LAYAR
-         * KIRIM screenshot halamannya ke aku nanti ku fix.
-         */
+        // Debug error Supabase
         if ($response->failed()) {
             dd([
                 'status'  => $response->status(),

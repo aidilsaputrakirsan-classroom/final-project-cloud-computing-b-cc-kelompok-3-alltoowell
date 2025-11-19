@@ -101,8 +101,10 @@ class AuthController extends Controller
             'user_phone' => $user['phone']
         ]);
 
-        return redirect()->intended(
-            $user['role'] === 'admin' ? '/admin/dashboard' : '/user/dashboard'
+       return redirect()->intended(
+        $user['role'] === 'admin'
+        ? '/admin/dashboard'
+        : '/rooms'
         );
     }
 

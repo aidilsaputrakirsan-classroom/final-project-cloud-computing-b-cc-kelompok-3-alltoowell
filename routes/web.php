@@ -2,97 +2,102 @@
 
 use Illuminate\Support\Facades\Route;
 
-// AUTH & USER CONTROLLERS
+// AUTH
 use App\Http\Controllers\AuthController;
+
+// USER
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\RoomController;   // ← Penting
 use App\Http\Controllers\BookingController;
 
-// ADMIN CONTROLLERS
+// ADMIN
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\RoomController as AdminRoomController;
+use App\Http\Controllers\Admin\BookingController as AdminBookingController;
+use App\Http\Controllers\Admin\PenggunaController;
 
-// USER ROOM CONTROLLER
-use App\Http\Controllers\RoomController as UserRoomController;
 
-
-/* ============================================================
-|                           HOME
-============================================================ */
+/*
+|--------------------------------------------------------------------------
+| HOME (Halaman Utama)
+|--------------------------------------------------------------------------
+*/
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 
-/* ============================================================
-|                  USER – LIST & DETAIL ROOMS
-|     (untuk user dan publik melihat daftar & detail kamar)
-============================================================ */
+/*
+|--------------------------------------------------------------------------
+| USER – LIST & DETAIL ROOMS  ← YANG KEMARIN KURANG
+|--------------------------------------------------------------------------
+*/
 
-// daftar kamar
-Route::get('/rooms', [UserRoomController::class, 'index'])
+// Daftar semua kamar (user)
+Route::get('/rooms', [RoomController::class, 'index'])
     ->name('rooms.list');
 
-// detail kamar — FIX: Hapus whereNumber karena ID Supabase == UUID
-Route::get('/rooms/{id}', [UserRoomController::class, 'show'])
+// Detail kamar
+Route::get('/rooms/{id}', [RoomController::class, 'show'])
     ->name('rooms.show');
 
 
-/* ============================================================
-|                       BOOKING (PUBLIC)
-============================================================ */
-Route::get('/booking/{roomCode}', [BookingController::class, 'show'])
-    ->where('roomCode', 'room[0-9]+')
-    ->name('booking.show');
-
-Route::post('/booking/{roomCode}', [BookingController::class, 'store'])
-    ->where('roomCode', 'room[0-9]+')
-    ->name('booking.store');
+/*
+|--------------------------------------------------------------------------
+| USER BOOKING
+|--------------------------------------------------------------------------
+*/
+Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
+Route::post('/booking/{id}', [BookingController::class, 'store'])->name('booking.store');
 
 
-/* ============================================================
-|                      ADMIN ROUTES
-|              (Hanya admin yang boleh akses)
-============================================================ */
+/*
+|--------------------------------------------------------------------------
+| ADMIN (HARUS ROLE:ADMIN)
+|--------------------------------------------------------------------------
+*/
 Route::prefix('admin')
-    ->name('admin.')
     ->middleware(['role:admin'])
+    ->name('admin.')
     ->group(function () {
 
-        // Dashboard Admin
-        Route::get('/', [BookingController::class, 'index'])
-            ->name('dashboard');
+        // Dashboard
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        // CRUD kamar
-        Route::get('/rooms',           [AdminRoomController::class, 'index'])->name('rooms.index');
-        Route::get('/rooms/create',    [AdminRoomController::class, 'create'])->name('rooms.create');
-        Route::post('/rooms',          [AdminRoomController::class, 'store'])->name('rooms.store');
+        // CRUD Kamar
+        Route::get('/rooms', [AdminRoomController::class, 'index'])->name('rooms.index');
+        Route::get('/rooms/create', [AdminRoomController::class, 'create'])->name('rooms.create');
+        Route::post('/rooms', [AdminRoomController::class, 'store'])->name('rooms.store');
         Route::get('/rooms/{id}/edit', [AdminRoomController::class, 'edit'])->name('rooms.edit');
-        Route::put('/rooms/{id}',      [AdminRoomController::class, 'update'])->name('rooms.update');
-        Route::delete('/rooms/{id}',   [AdminRoomController::class, 'destroy'])->name('rooms.destroy');
+        Route::put('/rooms/{id}', [AdminRoomController::class, 'update'])->name('rooms.update');
+        Route::delete('/rooms/{id}', [AdminRoomController::class, 'destroy'])->name('rooms.destroy');
 
-        // Update status booking admin
-        Route::patch('/{id}',  [BookingController::class, 'update'])->name('booking.update');
-        Route::delete('/{id}', [BookingController::class, 'destroy'])->name('booking.destroy');
+        // Booking (admin)
+        Route::get('/booking', [AdminBookingController::class, 'index'])->name('booking.index');
+        Route::patch('/booking/{id}', [AdminBookingController::class, 'update'])->name('booking.update');
+        Route::delete('/booking/{id}', [AdminBookingController::class, 'destroy'])->name('booking.destroy');
+
+        // Kelola Pengguna
+        Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna.index');
+        Route::put('/pengguna/{id}', [PenggunaController::class, 'update'])->name('pengguna.update');
     });
 
 
-/* ============================================================
-|                         USER DASHBOARD
-============================================================ */
-Route::prefix('user')
-    ->name('user.')
-    ->middleware(['role:user'])
-    ->group(function () {
-        Route::get('/dashboard', function () {
-            return view('user.dashboard');
-        })->name('dashboard');
-    });
+/*
+|--------------------------------------------------------------------------
+| AUTH ROUTES
+|--------------------------------------------------------------------------
+*/
 
+// Form login
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 
-/* ============================================================
-|                           AUTH
-============================================================ */
-Route::get('login',    [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('login',   [AuthController::class, 'login']);
+// Proses login
+Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('register', [AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('register',[AuthController::class, 'register']);
+// Form register
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 
-Route::post('logout',  [AuthController::class, 'logout'])->name('logout');
+// Proses register
+Route::post('/register', [AuthController::class, 'register']);
+
+// Logout
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

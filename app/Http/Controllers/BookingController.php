@@ -2,165 +2,99 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\SupabaseService;
 use Illuminate\Http\Request;
-use function view;
-use function abort;
-use function back;
-use function redirect;
-use function now;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class BookingController extends Controller
 {
-    protected $supabase;
+    private $supabaseUrl;
+    private $supabaseKey;
 
-    public function __construct(SupabaseService $supabase)
+    public function __construct()
     {
-        $this->supabase = $supabase;
+        $this->supabaseUrl = rtrim(env('SUPABASE_URL'), '/');
+        $this->supabaseKey = env('SUPABASE_KEY');
     }
 
     /**
-     * Tampilkan form booking berdasarkan kode kamar.
-     * Contoh URL: /booking/room1, /booking/room2, dst.
+     * TAMPILKAN FORM BOOKING
      */
-    public function show($roomCode)
+    public function show($id)
     {
-        $number = ltrim($roomCode, 'room');
+        $response = Http::withHeaders([
+            'apikey'        => $this->supabaseKey,
+            'Authorization' => 'Bearer ' . $this->supabaseKey,
+        ])->get("{$this->supabaseUrl}/rest/v1/rooms?id=eq.$id&select=*");
 
-        // Daftar kamar yang tersedia
-        $rooms = [
-            1 => [
-                'id' => 'e2bfc970-b3f0-4a4f-bde5-0ab60f628e10',
-                'name' => 'Kamar Deluxe',
-                'price' => 1500000,
-                'location' => 'Lantai 2',
-            ],
-            2 => [
-                'id' => '8f1a2b3c-4d5e-6f7g-8h9i-0j1k2l3m4n5o',
-                'name' => 'Kamar Standard',
-                'price' => 900000,
-                'location' => 'Lantai 1',
-            ],
-            3 => [
-                'id' => '1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p',
-                'name' => 'Kamar VIP',
-                'price' => 2000000,
-                'location' => 'Lantai 3',
-            ],
-            4 => [
-                'id' => 'uuid-kamar-4',
-                'name' => 'Kamar Family',
-                'price' => 2500000,
-                'location' => 'Lantai 4',
-            ],
-            // Tambahkan kamar lain di sini jika perlu
-        ];
+        $data = $response->json();
 
-        if (!isset($rooms[$number])) {
-            abort(404, "Kamar {$roomCode} tidak ditemukan!");
+        if (empty($data)) {
+            abort(404, 'Kamar tidak ditemukan');
         }
 
-        return view('booking.create', ['room' => $rooms[$number]]);
+        $room = $data[0];
+
+        return view('booking.index', compact('room'));
     }
 
     /**
-     * Simpan data booking ke database (via Supabase).
+     * SIMPAN BOOKING ↗️ KE SUPABASE
      */
-    public function store(Request $request, $roomCode)
+    public function store(Request $request, $id)
     {
-        $number = ltrim($roomCode, 'room');
-
-        $rooms = [
-            1 => ['id' => 'e2bfc970-b3f0-4a4f-bde5-0ab60f628e10', 'price' => 1500000],
-            2 => ['id' => '8f1a2b3c-4d5e-6f7g-8h9i-0j1k2l3m4n5o', 'price' => 900000],
-            3 => ['id' => '1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p', 'price' => 2000000],
-        ];
-
-        if (!isset($rooms[$number])) {
-            abort(404);
-        }
-
-        $room = $rooms[$number];
-        $roomId = $room['id'];
-
-        // Validasi form
+        // Validasi input form
         $request->validate([
-            'name'       => 'required|string|max:255',
-            'email'      => 'required|email',
-            'phone'      => 'required|string|min:10',
-            'nik'        => 'required|string|size:16',
-            'start_date' => 'required|date|after_or_equal:today',
-            'duration'   => 'required|in:3,6,12',
-            'payment'    => 'required|in:Transfer Bank,Cash,E-Wallet',
+            'start_date'      => 'required|date',
+            'duration'        => 'required|integer|min:1',
+            'payment_method'  => 'required|string',
         ]);
 
-        $totalPrice = $room['price'] * $request->duration;
-        $nextNumber = $this->supabase->getBookingCount() + 1;
-        $bookingId  = 'B' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        // Pastikan user login
+        if (!session('user_id')) {
+            return redirect('/login')->with('error', 'Silakan login dulu.');
+        }
 
-        $bookingData = [
+        // Generate ID booking
+        $uuid       = (string) Str::uuid();
+        $bookingId  = 'BK-' . strtoupper(Str::random(6));
+
+        // Data yang dikirim ke Supabase
+        $payload = [
+            'id'             => $uuid,
             'booking_id'     => $bookingId,
-            'room_id'        => $roomId,
-            'user_id'        => 999,
-            'user_name'      => $request->name,
-            'user_email'     => $request->email,
-            'user_phone'     => $request->phone,
-            'nik'            => $request->nik,
+            'room_id'        => $id,
+            'user_id'        => session('user_id'),
+            'user_name'      => session('user_name'),
+            'user_email'     => session('user_email'),
+            'user_phone'     => session('user_phone'),
             'start_date'     => $request->start_date,
             'duration'       => (int) $request->duration,
-            'payment_method' => $request->payment,
-            'total_price'    => $totalPrice,
+            'payment_method' => $request->payment_method,
             'status'         => 'pending',
-            'created_at'     => now()->toDateTimeString(),
         ];
 
-        $response = $this->supabase->createBooking($bookingData);
+        // Kirim ke Supabase
+        $response = Http::withHeaders([
+            'apikey'        => $this->supabaseKey,
+            'Authorization' => 'Bearer ' . $this->supabaseKey,
+            'Content-Type'  => 'application/json',
+            'Prefer'        => 'return=representation'
+        ])->post("{$this->supabaseUrl}/rest/v1/bookings", $payload);
 
+        /**
+         * 🔥 DEBUG — SUPABASE ERROR AKAN MUNCUL DI LAYAR
+         * KIRIM screenshot halamannya ke aku nanti ku fix.
+         */
         if ($response->failed()) {
-            return back()->with('error', 'Gagal simpan: ' . $response->body());
+            dd([
+                'status'  => $response->status(),
+                'error'   => $response->body(),
+                'payload' => $payload,
+            ]);
         }
 
-        return redirect('/admin')->with('toast', "Booking {$bookingId} berhasil!");
-    }
-
-    /**
-     * Tampilkan semua data booking untuk admin.
-     */
-    public function index()
-    {
-        $response = $this->supabase->getAllBookingsWithRoom();
-        $bookings = is_string($response) ? json_decode($response, true) : $response;
-        $bookings = $bookings ?? [];
-
-        return view('admin.bookings', compact('bookings'));
-    }
-
-    /**
-     * Update status booking (confirmed / rejected / cancelled).
-     */
-    public function update(Request $request, $id)
-    {
-        $request->validate(['status' => 'required|in:confirmed,rejected,cancelled']);
-        $response = $this->supabase->updateBookingStatus($id, $request->status);
-
-        if ($response->failed()) {
-            return back()->with('error', 'Gagal update status');
-        }
-
-        return back()->with('toast', 'Status berhasil diubah!');
-    }
-
-    /**
-     * Hapus booking dari database.
-     */
-    public function destroy($id)
-    {
-        $response = $this->supabase->deleteBooking($id);
-
-        if ($response->failed()) {
-            return back()->with('error', 'Gagal hapus');
-        }
-
-        return back()->with('toast', 'Booking dihapus!');
+        return redirect('/')
+            ->with('success', 'Booking berhasil disimpan!');
     }
 }

@@ -1,77 +1,78 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Kamar - {{ $room['name'] }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-        <div class="bg-white rounded-xl shadow-lg max-w-2xl mx-auto p-8">
-            <h1 class="text-3xl font-bold text-purple-600 mb-6 text-center">
-                Booking Kamar {{ $room['name'] }}
-            </h1>
+@extends('layouts.app')
 
-            <div class="bg-gray-50 p-6 rounded-lg mb-8">
-                <div class="grid grid-cols-2 gap-4 text-lg">
-                    <div><strong>Harga per bulan:</strong></div>
-                    <div class="text-right">Rp {{ number_format($room['price']) }}</div>
-                    <div><strong>Lokasi:</strong></div>
-                    <div class="text-right">{{ $room['location'] }}</div>
-                </div>
-            </div>
+@section('title', 'Booking Kamar')
 
-            <form action="/booking/{{ $room['id'] }}" method="POST">
-                @csrf
-                <div class="grid grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Nama Lengkap</label>
-                        <input type="text" name="name" required class="w-full px-4 py-3 border rounded-lg" placeholder="Budi Santoso">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Email</label>
-                        <input type="email" name="email" required class="w-full px-4 py-3 border rounded-lg" placeholder="budi@gmail.com">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">No. Telepon</label>
-                        <input type="text" name="phone" required minlength="10" class="w-full px-4 py-3 border rounded-lg" placeholder="081234567890">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">NIK</label>
-                        <input type="text" name="nik" required maxlength="16" minlength="16" class="w-full px-4 py-3 border rounded-lg" placeholder="1234567890123456">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Tanggal Mulai</label>
-                        <input type="date" name="start_date" required min="{{ date('Y-m-d') }}" class="w-full px-4 py-3 border rounded-lg">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Durasi (bulan)</label>
-                        <select name="duration" required class="w-full px-4 py-3 border rounded-lg">
-                            <option value="3">3 Bulan</option>
-                            <option value="6">6 Bulan</option>
-                            <option value="12">12 Bulan</option>
-                        </select>
-                    </div>
-                    <div class="col-span-2">
-                        <label class="block text-sm font-medium mb-2">Metode Pembayaran</label>
-                        <select name="payment" required class="w-full px-4 py-3 border rounded-lg">
-                            <option>Transfer Bank</option>
-                            <option>Cash</option>
-                            <option>E-Wallet</option>
-                        </select>
-                    </div>
-                </div>
+@section('content')
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-xl shadow-lg max-w-3xl mx-auto p-8">
 
-                <button type="submit" class="mt-8 w-full bg-purple-600 text-white py-4 rounded-lg text-xl font-bold hover:bg-purple-700">
-                    KIRIM PEMESANAN
-                </button>
-            </form>
+        <h1 class="text-3xl font-bold text-purple-600 mb-6">
+            Booking Kamar {{ $room['name'] }}
+        </h1>
 
-            <div class="mt-6 text-center">
-                <a href="/admin/bookings" class="text-purple-600 hover:underline">Lihat Semua Booking →</a>
-            </div>
+        {{-- Informasi Kamar --}}
+        <div class="bg-gray-50 p-6 rounded-xl mb-8">
+            <p class="text-lg"><strong>Harga:</strong> Rp {{ number_format($room['price']) }}/bulan</p>
+            <p class="text-lg"><strong>Lokasi:</strong> {{ $room['location'] }}</p>
         </div>
+
+        <form action="{{ url('/booking/' . $room['id']) }}" method="POST">
+            @csrf
+
+            {{-- Nama otomatis --}}
+            <div class="mb-4">
+                <label class="block mb-1 font-semibold">Nama</label>
+                <input type="text" value="{{ $user['name'] }}" disabled class="w-full p-3 border rounded-lg bg-gray-100">
+            </div>
+
+            {{-- Email otomatis --}}
+            <div class="mb-4">
+                <label class="block mb-1 font-semibold">Email</label>
+                <input type="text" value="{{ $user['email'] }}" disabled class="w-full p-3 border rounded-lg bg-gray-100">
+            </div>
+
+            {{-- Phone otomatis --}}
+            <div class="mb-4">
+                <label class="block mb-1 font-semibold">Telepon</label>
+                <input type="text" value="{{ $user['phone'] }}" disabled class="w-full p-3 border rounded-lg bg-gray-100">
+            </div>
+
+            {{-- NIK --}}
+            <div class="mb-4">
+                <label class="block mb-1 font-semibold">NIK</label>
+                <input type="text" name="nik" class="w-full p-3 border rounded-lg" required minlength="16" maxlength="16">
+            </div>
+
+            {{-- Tanggal mulai --}}
+            <div class="mb-4">
+                <label class="block mb-1 font-semibold">Tanggal Mulai</label>
+                <input type="date" name="start_date" class="w-full p-3 border rounded-lg" required min="{{ date('Y-m-d') }}">
+            </div>
+
+            {{-- Durasi --}}
+            <div class="mb-4">
+                <label class="block mb-1 font-semibold">Durasi</label>
+                <select name="duration" class="w-full p-3 border rounded-lg" required>
+                    <option value="3">3 bulan</option>
+                    <option value="6">6 bulan</option>
+                    <option value="12">12 bulan</option>
+                </select>
+            </div>
+
+            {{-- Pembayaran --}}
+            <div class="mb-6">
+                <label class="block mb-1 font-semibold">Metode Pembayaran</label>
+                <select name="payment" class="w-full p-3 border rounded-lg" required>
+                    <option value="Transfer Bank">Transfer Bank</option>
+                    <option value="Cash">Cash</option>
+                    <option value="E-Wallet">E-Wallet</option>
+                </select>
+            </div>
+
+            <button class="w-full py-4 bg-purple-600 text-white rounded-xl font-bold text-lg hover:bg-purple-700">
+                Kirim Booking
+            </button>
+        </form>
     </div>
-</body>
-</html>
+</div>
+@endsection

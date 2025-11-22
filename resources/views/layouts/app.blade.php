@@ -1,90 +1,68 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth" x-data="{ darkMode: false }" x-bind:class="darkMode ? 'dark' : ''">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>KOST-SI - @yield('title', 'Sistem Manajemen Kamar')</title>
 
-    {{-- Tailwind + Lucide --}}
+    <!-- Tailwind CDN + Custom Colors -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
-                    colors: { primary: '#5B4FE3' }
+                    colors: {
+                        primary: '#60A5FA',
+                        'primary-dark': '#3B82F6',
+                        'primary-light': '#93C5FD',
+                        accent: '#38BDF8',
+                        'accent-light': '#7DD3FC',
+                        muted: '#F0F9FF',
+                        border: '#BFDBFE',
+                    }
                 }
             }
         }
     </script>
 
-    {{-- Vite --}}
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Animations -->
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.7s ease-out both; }
+    </style>
 </head>
 
-<body class="min-h-screen bg-gray-50 text-gray-800">
+<body class="min-h-screen bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 transition">
 
-    {{-- NAVBAR (hanya muncul jika halaman define section navbar) --}}
+    {{-- NAVBAR --}}
     @yield('navbar')
 
-    {{-- NOTIFIKASI --}}
-    <div
-        x-data="{ show: @json(session('success') || session('error')), message: '{{ session('success') ?? session('error') }}' }"
-        x-show="show"
-        x-transition
-        x-init="setTimeout(() => show = false, 3000)"
-        class="fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg text-white text-center z-50"
-        :class="{
-            'bg-green-500': '{{ session('success') }}',
-            'bg-red-500': '{{ session('error') }}'
-        }"
-        style="display: none;"
-    >
-        <p x-text="message"></p>
-    </div>
-
-    {{-- TOAST --}}
-    <div id="toast"
-         class="fixed bottom-4 right-4 bg-white border rounded-lg shadow-lg p-4 translate-y-20 transition-transform z-50 hidden">
-        <div class="flex items-center gap-3">
-            <div id="toast-icon"></div>
-            <p id="toast-message"></p>
+    {{-- ALERT --}}
+    @if(session('success') || session('error'))
+        <div class="fixed top-4 left-1/2 -translate-x-1/2 z-50 fade-in
+            px-6 py-3 rounded-lg shadow-lg text-white
+            {{ session('success') ? 'bg-green-500' : 'bg-red-500' }}">
+            {{ session('success') ?? session('error') }}
         </div>
-    </div>
+    @endif
 
-    {{-- MAIN CONTENT --}}
-    <main class="min-h-screen container mx-auto py-8 px-4">
+    <main>
         @yield('content')
     </main>
 
+    <!-- Active Icons -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
-
-        @if(session('toast'))
-            showToast("{{ session('toast') }}", 'success');
-        @endif
-
-        function showToast(msg, type = 'success') {
-            const t = document.getElementById('toast'),
-                  m = document.getElementById('toast-message'),
-                  i = document.getElementById('toast-icon');
-
-            m.textContent = msg;
-            i.innerHTML = type === 'success'
-                ? '<i data-lucide="check-circle-2" class="w-5 h-5 text-green-500"></i>'
-                : '<i data-lucide="x-circle" class="w-5 hb-5 text-red-500"></i>';
-
-            t.classList.remove('hidden');
-            t.style.transform = 'translateY(0)';
-            lucide.createIcons();
-
-            setTimeout(() => {
-                t.style.transform = 'translateY(200px)';
-                setTimeout(() => t.classList.add('hidden'), 300);
-            }, 3000);
-        }
+        document.addEventListener("DOMContentLoaded", () => lucide.createIcons());
     </script>
 
 </body>

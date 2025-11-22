@@ -38,11 +38,8 @@ class AuthController extends Controller
         ]);
 
         $email = strtolower(trim($request->email));
-
-        // Tentukan role berdasarkan email
         $role = str_ends_with($email, '@admin.com') ? 'admin' : 'user';
 
-        // Simpan ke Supabase
         $response = Http::withHeaders([
             'apikey'        => $this->supabaseKey,
             'Authorization' => 'Bearer ' . $this->supabaseKey,
@@ -53,7 +50,7 @@ class AuthController extends Controller
             'email'    => $email,
             'phone'    => $request->phone,
             'password' => Hash::make($request->password),
-            'role'     => $role   // Konflik diperbaiki, memakai role dinamis
+            'role'     => $role
         ]);
 
         if ($response->failed()) {
@@ -111,7 +108,6 @@ class AuthController extends Controller
             'user_phone' => $user['phone']
         ]);
 
-        // Redirect otomatis berdasarkan role
         return redirect()->intended(
             $user['role'] === 'admin'
                 ? '/admin/dashboard'
@@ -122,7 +118,6 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->session()->flush();
-
         return redirect('/')->with('success', 'Logout berhasil.');
     }
 }

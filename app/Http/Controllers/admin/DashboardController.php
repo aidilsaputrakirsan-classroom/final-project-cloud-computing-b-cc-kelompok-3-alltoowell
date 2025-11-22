@@ -16,15 +16,11 @@ class DashboardController extends Controller
 
     public function index()
     {
-        // ============================
-        // AMBIL DATA
-        // ============================
+        // Ambil data
         $rooms = $this->supabase->getAllRooms();
         $bookings = $this->supabase->getAllBookingsSimple();
 
-        // ============================
-        // MAP ROOM -> PRICE & NAME
-        // ============================
+        // Map harga & nama kamar
         $roomMap = [];
         foreach ($rooms as $room) {
             $roomMap[$room['id']] = [
@@ -33,28 +29,22 @@ class DashboardController extends Controller
             ];
         }
 
-        // =====================================================
-        // TAMBAHKAN INFO ROOM KE SEMUA BOOKING UNTUK TABEL
-        // =====================================================
+        // Gabungkan room info ke booking
         $bookings = array_map(function ($b) use ($roomMap) {
-            $roomId = $b['room_id'] ?? null;
+            $rid = $b['room_id'] ?? null;
 
-            $b['room_price'] = $roomMap[$roomId]['price'] ?? 0;
-            $b['room_name']  = $roomMap[$roomId]['name'] ?? '-';
+            $b['room_price'] = $roomMap[$rid]['price'] ?? 0;
+            $b['room_name']  = $roomMap[$rid]['name'] ?? '-';
 
             return $b;
         }, $bookings);
 
-        // =====================================================
-        // FILTER BOOKING VALID (CONFIRMED SAJA)
-        // =====================================================
-        $validBookings = array_filter($bookings, function ($b) {
-            return isset($b['status']) && $b['status'] === 'confirmed';
-        });
+        // Booking valid (confirmed)
+        $validBookings = array_filter($bookings, fn($b) =>
+            ($b['status'] ?? '') === 'confirmed'
+        );
 
-        // =====================================================
-        // HITUNG REVENUE & GRAFIK
-        // =====================================================
+        // Perhitungan KPI
         $totalRevenue = 0;
         $monthlyRevenue = 0;
         $currentMonth = date('Y-m');
@@ -64,13 +54,13 @@ class DashboardController extends Controller
         $roomPopularity = [];
 
         foreach ($validBookings as $b) {
-            $roomId = $b['room_id'] ?? null;
-            $price = $roomMap[$roomId]['price'] ?? 0;
+            $rid = $b['room_id'] ?? null;
+            $price = $roomMap[$rid]['price'] ?? 0;
 
-            // Total pendapatan
+            // Total revenue
             $totalRevenue += $price;
 
-            // Pendapatan bulan berjalan
+            // Revenue bulan ini
             if (isset($b['created_at']) && str_starts_with($b['created_at'], $currentMonth)) {
                 $monthlyRevenue += $price;
             }
@@ -84,40 +74,46 @@ class DashboardController extends Controller
             }
 
             // Popularitas kamar
-            $roomPopularity[$roomMap[$roomId]['name']] =
-                ($roomPopularity[$roomMap[$roomId]['name']] ?? 0) + 1;
+            $roomPopularity[$roomMap[$rid]['name']] =
+                ($roomPopularity[$roomMap[$rid]['name']] ?? 0) + 1;
         }
 
+        // Sort grafik
         ksort($bookingChart);
         ksort($revenueChart);
         arsort($roomPopularity);
 
-        // =====================================================
-        // HITUNG KAMAR TERSEDIA (HANYA CONFIRMED YG MENGUNCI)
-        // =====================================================
+        // Kamar tersedia (confirmed mengunci kamar)
         $bookedRoomIds = array_column($validBookings, 'room_id');
+        $availableRooms = array_filter($rooms, fn($room) =>
+            !in_array($room['id'], $bookedRoomIds)
+        );
 
-        $availableRooms = array_filter($rooms, function ($room) use ($bookedRoomIds) {
-            return !in_array($room['id'], $bookedRoomIds);
-        });
+        // Pending count
+        $pendingCount = count(array_filter($bookings, fn($b) =>
+            ($b['status'] ?? '') === 'pending'
+        ));
 
-        // =====================================================
-        // KIRIM DATA KE BLADE
-        // =====================================================
+        // Recent booking (limit 6)
+        $recentBookings = array_slice($bookings, 0, 6);
+
+        // Kirim ke view
         return view('admin.dashboard', [
-            'rooms'          => $rooms,
-            'bookings'       => $bookings, // semua status untuk tabel
-            'totalRooms'     => count($rooms),
-            'availableRooms' => count($availableRooms),
-            'totalBookings'  => count($validBookings), // hanya confirmed
+            'rooms'            => $rooms,
+            'bookings'         => $bookings,
+            'recentBookings'   => $recentBookings,
+            'totalRooms'       => count($rooms),
+            'availableRooms'   => count($availableRooms),
+            'totalBookings'    => count($validBookings),
 
-            'totalRevenue'   => $totalRevenue,
-            'monthlyRevenue' => $monthlyRevenue,
+            'pendingCount'     => $pendingCount,
+            'totalRevenue'     => $totalRevenue,
+            'monthlyRevenue'   => $monthlyRevenue,
 
-            'bookingChart'   => $bookingChart,
-            'revenueChart'   => $revenueChart,
+            'bookingChart'     => $bookingChart,
+            'revenueChart'     => $revenueChart,
 
-            'topRooms'       => array_slice($roomPopularity, 0, 5, true),
+            'topRooms'         => array_slice($roomPopularity, 0, 5, true),
         ]);
     }
 }

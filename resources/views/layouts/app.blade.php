@@ -6,7 +6,7 @@
 
     <title>KOST-SI - @yield('title', 'Sistem Manajemen Kamar')</title>
 
-    {{-- Integrasi Tailwind & Lucide --}}
+    {{-- Tailwind + Lucide --}}
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -26,10 +26,10 @@
 
 <body class="min-h-screen bg-gray-50 text-gray-800">
 
-    {{-- NAVBAR (HEAD VERSION) --}}
-    @include('components.navbar')
+    {{-- NAVBAR (hanya jika halaman menentukan section navbar) --}}
+    @yield('navbar')
 
-    {{-- NOTIFIKASI (Alpine + session) --}}
+    {{-- NOTIFIKASI --}}
     <div
         x-data="{ show: @json(session('success') || session('error')), message: '{{ session('success') ?? session('error') }}' }"
         x-show="show"
@@ -45,20 +45,20 @@
         <p x-text="message"></p>
     </div>
 
-    {{-- TOAST CUSTOM --}}
-    <div id="toast" class="fixed bottom-4 right-4 bg-white border rounded-lg shadow-lg p-4 translate-y-20 transition-transform z-50 hidden">
+    {{-- TOAST --}}
+    <div id="toast"
+         class="fixed bottom-4 right-4 bg-white border rounded-lg shadow-lg p-4 translate-y-20 transition-transform z-50 hidden">
         <div class="flex items-center gap-3">
             <div id="toast-icon"></div>
             <p id="toast-message"></p>
         </div>
     </div>
 
-    {{-- MAIN CONTENT (HEAD VERSION) --}}
+    {{-- MAIN CONTENT --}}
     <main class="min-h-screen container mx-auto py-8 px-4">
         @yield('content')
     </main>
 
-    {{-- ICON INIT + TOAST SCRIPT --}}
     <script>
         document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
 

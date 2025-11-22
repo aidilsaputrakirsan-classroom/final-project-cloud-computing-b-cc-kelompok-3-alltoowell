@@ -17,7 +17,7 @@ class Kernel
     }
 
     /**
-     * REGISTER ROUTE MIDDLEWARE
+     * Daftar middleware untuk route.
      */
     protected function registerRouteMiddleware(): void
     {
@@ -26,11 +26,11 @@ class Kernel
 
     public function middleware(): void
     {
-        //
+        // middleware global jika dibutuhkan
     }
 
     public function bootstrap(): void
     {
-        //
+        // proses bootstrap jika dibutuhkan
     }
 }

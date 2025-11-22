@@ -26,7 +26,7 @@
 
 <body class="min-h-screen bg-gray-50 text-gray-800">
 
-    {{-- NAVBAR (hanya jika halaman menentukan section navbar) --}}
+    {{-- NAVBAR (hanya muncul jika halaman define section navbar) --}}
     @yield('navbar')
 
     {{-- NOTIFIKASI --}}
@@ -74,7 +74,7 @@
             m.textContent = msg;
             i.innerHTML = type === 'success'
                 ? '<i data-lucide="check-circle-2" class="w-5 h-5 text-green-500"></i>'
-                : '<i data-lucide="x-circle" class="w-5 h-5 text-red-500"></i>';
+                : '<i data-lucide="x-circle" class="w-5 hb-5 text-red-500"></i>';
 
             t.classList.remove('hidden');
             t.style.transform = 'translateY(0)';

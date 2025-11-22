@@ -7,7 +7,7 @@ use App\Http\Controllers\AuthController;
 
 // USER
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\RoomController;   // ← Penting
+use App\Http\Controllers\RoomController;   // penting
 use App\Http\Controllers\BookingController;
 
 // ADMIN
@@ -78,7 +78,6 @@ Route::prefix('admin')
         Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna.index');
         Route::put('/pengguna/{id}', [PenggunaController::class, 'update'])->name('pengguna.update');
     });
-
 
 
 /*

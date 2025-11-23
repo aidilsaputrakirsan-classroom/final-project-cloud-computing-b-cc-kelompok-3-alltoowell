@@ -22,18 +22,22 @@ class BookingManagementController extends Controller
         // Ambil semua kamar
         $rooms = $this->supabase->getAllRooms();
 
-        // Map room_id → detail room
+        // Buat map id kamar → detail kamar
         $roomMap = [];
         foreach ($rooms as $room) {
             $roomMap[$room['id']] = $room;
         }
 
-        // Gabungkan room ke setiap booking TANPA merusak kolom id booking
+        // Gabungkan room detail ke booking
         foreach ($bookings as &$b) {
-            $b['room'] = $roomMap[$b['room_id']] ?? null;
+            $b['room'] = $roomMap[$b['room_id']] ?? [
+                'name' => 'Tidak ditemukan',
+                'location' => '-',
+                'price' => 0
+            ];
         }
 
-        return view('admin.rooms.index', [
+        return view('admin.bookings', [
             'bookings' => $bookings
         ]);
     }
@@ -44,11 +48,11 @@ class BookingManagementController extends Controller
             'status' => 'required|in:pending,confirmed,rejected'
         ]);
 
-        $status = request()->input('status');
+        $status = request('status');
 
-        // Update status ke Supabase
+        // Update ke Supabase
         $this->supabase->updateBookingStatus($id, $status);
 
-        return back()->with('success', 'Status booking diperbarui.');
+        return back()->with('success', 'Status booking berhasil diperbarui');
     }
 }

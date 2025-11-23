@@ -7,21 +7,23 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\BookingController;
+
+// Admin Controllers
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\RoomController as AdminRoomController;
-use App\Http\Controllers\Admin\BookingController as AdminBookingController;
+use App\Http\Controllers\Admin\BookingManagementController;
 use App\Http\Controllers\Admin\PenggunaController;
 
 /*
 |--------------------------------------------------------------------------
-| HOME PUNYAMU
+| HOME
 |--------------------------------------------------------------------------
 */
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 /*
 |--------------------------------------------------------------------------
-| USER ROOMS PUNYAMU
+| USER ROOMS
 |--------------------------------------------------------------------------
 */
 Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.list');
@@ -29,7 +31,7 @@ Route::get('/rooms/{id}', [RoomController::class, 'show'])->name('rooms.show');
 
 /*
 |--------------------------------------------------------------------------
-| USER BOOKING PUNYAMU
+| USER BOOKING
 |--------------------------------------------------------------------------
 */
 Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
@@ -37,7 +39,7 @@ Route::post('/booking/{id}', [BookingController::class, 'store'])->name('booking
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN (HARUS ROLE ADMIN)
+| ADMIN
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')
@@ -47,6 +49,7 @@ Route::prefix('admin')
 
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+        // Rooms
         Route::get('/rooms', [AdminRoomController::class, 'index'])->name('rooms.index');
         Route::get('/rooms/create', [AdminRoomController::class, 'create'])->name('rooms.create');
         Route::post('/rooms', [AdminRoomController::class, 'store'])->name('rooms.store');
@@ -54,17 +57,18 @@ Route::prefix('admin')
         Route::put('/rooms/{id}', [AdminRoomController::class, 'update'])->name('rooms.update');
         Route::delete('/rooms/{id}', [AdminRoomController::class, 'destroy'])->name('rooms.destroy');
 
-        Route::get('/booking', [AdminBookingController::class, 'index'])->name('booking.index');
-        Route::patch('/booking/{id}', [AdminBookingController::class, 'update'])->name('booking.update');
-        Route::delete('/booking/{id}', [AdminBookingController::class, 'destroy'])->name('booking.destroy');
+        // BOOKING MANAGEMENT (ADMIN)
+        Route::get('/booking', [BookingManagementController::class, 'index'])->name('booking.index');
+        Route::patch('/booking/{id}', [BookingManagementController::class, 'updateStatus'])->name('booking.update');
 
+        // Pengguna
         Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna.index');
         Route::put('/pengguna/{id}', [PenggunaController::class, 'update'])->name('pengguna.update');
     });
 
 /*
 |--------------------------------------------------------------------------
-| AUTH ROUTES (VERSI TEMANMU)
+| AUTH
 |--------------------------------------------------------------------------
 */
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');

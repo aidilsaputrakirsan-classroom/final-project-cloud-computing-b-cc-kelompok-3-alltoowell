@@ -31,75 +31,95 @@
 
             <tbody class="divide-y divide-blue-100">
                 @forelse ($rooms as $room)
-                <tr class="hover:bg-blue-50/50 transition">
 
-                    <!-- FOTO -->
-                    <td class="p-3">
-                        <img src="{{ $room['image']
-                            ? asset('storage/rooms/' . $room['image'])
-                            : 'https://via.placeholder.com/80' }}"
-                            class="w-20 h-16 rounded-lg object-cover border border-blue-100 bg-white">
+                <tr class="border-b hover:bg-gray-50 transition">
+
+                    {{-- FOTO KAMAR --}}
+                    <td class="px-4 py-3">
+
+                        @php
+                            $image = $room['image'] ?? null;
+                            $imagePath = null;
+
+                            if ($image) {
+                                if (filter_var($image, FILTER_VALIDATE_URL)) {
+                                    // image berupa URL
+                                    $imagePath = $image;
+                                } else {
+                                    // image berupa nama file lokal → storage/rooms/
+                                    $imagePath = asset('storage/rooms/' . $image);
+                                }
+                            }
+                        @endphp
+
+                        @if ($imagePath)
+                            <img src="{{ $imagePath }}"
+                                 class="w-24 h-16 object-cover rounded border border-gray-200">
+                        @else
+                            <div class="w-24 h-16 bg-gray-200 rounded flex items-center justify-center text-gray-500">
+                                No Image
+                            </div>
+                        @endif
                     </td>
 
-                    <!-- NAMA -->
-                    <td class="p-3 font-semibold text-slate-700">
-                        {{ $room['name'] }}
+                    {{-- NAMA --}}
+                    <td class="px-4 py-3 font-semibold">
+                        {{ $room['name'] ?? '-' }}
                     </td>
 
-                    <!-- HARGA -->
-                    <td class="p-3 text-blue-600 font-semibold">
+                    {{-- HARGA --}}
+                    <td class="px-4 py-3 text-blue-600 font-semibold">
                         Rp {{ number_format($room['price'], 0, ',', '.') }}
                     </td>
 
-                    <!-- KAPASITAS -->
-                    <td class="p-3">
-                        {{ $room['capacity'] }} orang
+                    {{-- KAPASITAS --}}
+                    <td class="px-4 py-3">
+                        {{ $room['capacity'] ?? '-' }} orang
                     </td>
 
-                    <!-- STATUS -->
-                    <td class="p-3">
-                        <span class="
-                            px-3 py-1 rounded-full text-xs font-semibold
-                            {{ $room['status'] === 'available'
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-red-100 text-red-700' }}
-                        ">
-                            {{ ucfirst($room['status']) }}
+                    {{-- STATUS --}}
+                    <td class="px-4 py-3">
+                        @php $status = $room['status'] ?? 'unknown'; @endphp
+
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold text-white
+                            {{ $status === 'available'
+                                ? 'bg-green-600'
+                                : 'bg-red-500' }}">
+                            {{ ucfirst($status) }}
                         </span>
                     </td>
 
-                    <!-- AKSI -->
-                    <td class="p-3 flex items-center gap-3">
+                    {{-- AKSI --}}
+                    <td class="px-4 py-3">
+                        <div class="flex gap-3">
 
-                        <!-- Edit -->
-                        <a href="{{ route('admin.rooms.edit', $room['id']) }}"
-                           class="text-blue-600 hover:underline">
-                            Edit
-                        </a>
+                            <a href="{{ route('admin.rooms.edit', $room['id']) }}"
+                               class="text-blue-600 hover:underline">
+                                Edit
+                            </a>
 
-                        <!-- Delete -->
-                        <form action="{{ route('admin.rooms.destroy', $room['id']) }}"
-                              method="POST"
-                              onsubmit="return confirm('Hapus kamar ini?')">
-                            @csrf
-                            @method('DELETE')
-                            <button class="text-red-600 hover:underline">
-                                Hapus
-                            </button>
-                        </form>
+                            <form action="{{ route('admin.rooms.destroy', $room['id']) }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Hapus kamar ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button class="text-red-600 hover:underline">
+                                    Hapus
+                                </button>
+                            </form>
 
+                        </div>
                     </td>
                 </tr>
 
                 @empty
                 <tr>
-                    <td colspan="6" class="p-6 text-center text-slate-500">
+                    <td colspan="6" class="text-center py-6 text-gray-500">
                         Tidak ada kamar terdaftar.
                     </td>
                 </tr>
                 @endforelse
             </tbody>
-
         </table>
 
     </div>

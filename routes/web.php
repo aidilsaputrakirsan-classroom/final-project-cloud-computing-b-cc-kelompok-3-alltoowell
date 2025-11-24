@@ -49,7 +49,7 @@ Route::prefix('admin')
 
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        // Rooms
+        // Rooms CRUD
         Route::get('/rooms', [AdminRoomController::class, 'index'])->name('rooms.index');
         Route::get('/rooms/create', [AdminRoomController::class, 'create'])->name('rooms.create');
         Route::post('/rooms', [AdminRoomController::class, 'store'])->name('rooms.store');
@@ -57,7 +57,7 @@ Route::prefix('admin')
         Route::put('/rooms/{id}', [AdminRoomController::class, 'update'])->name('rooms.update');
         Route::delete('/rooms/{id}', [AdminRoomController::class, 'destroy'])->name('rooms.destroy');
 
-        // BOOKING MANAGEMENT (ADMIN)
+        // Booking Management (Admin)
         Route::get('/booking', [BookingManagementController::class, 'index'])->name('booking.index');
         Route::patch('/booking/{id}', [BookingManagementController::class, 'updateStatus'])->name('booking.update');
 
@@ -78,3 +78,12 @@ Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('regi
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+/*
+|--------------------------------------------------------------------------
+| STORAGE PROTECTION (WAJIB AGAR GAMBAR TIDAK TERTELAN ROUTE)
+|--------------------------------------------------------------------------
+*/
+Route::get('/storage/{path}', function () {
+    abort(404);
+})->where('path', '.*');

@@ -1,336 +1,195 @@
-{{-- resources/views/admin/dashboard.blade.php --}}
 @extends('layouts.admin')
 
+@section('title','Dashboard')
+
 @section('content')
-<div class="p-6 max-w-7xl mx-auto">
 
-    <h1 class="text-3xl font-bold mb-6">Dashboard Admin</h1>
+<style>
+    .soft-card {
+        background: #ffffffcc;
+        border-radius: 18px;
+        border: 1px solid #e5eaf3;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+        padding: 22px;
+        transition: .25s;
+    }
+    .soft-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 28px rgba(0,0,0,0.08);
+    }
+    .title-sec {
+        color: #1e2a44;
+        font-weight: 600;
+        font-size: 1.15rem;
+    }
+    .dashboard-wrapper {
+        background: linear-gradient(180deg, #e9f3ff 0%, #f5f9ff 100%);
+        border-radius: 18px;
+        padding: 22px;
+    }
+</style>
 
-    {{-- KARTU STATISTIK --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+<div class="dashboard-wrapper">
 
-        <div class="bg-white shadow rounded-lg p-4">
-            <h3 class="text-sm text-gray-500">Total Kamar</h3>
-            <p class="text-2xl font-bold">{{ $totalRooms ?? 0 }}</p>
-            <p class="text-xs text-gray-400 mt-2">Semua kamar terdaftar</p>
-        </div>
+    <!-- KPI CARDS -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
 
-        <div class="bg-white shadow rounded-lg p-4">
-            <h3 class="text-sm text-gray-500">Kamar Tersedia</h3>
-            <p class="text-2xl font-bold">{{ $availableRooms ?? 0 }}</p>
-            <p class="text-xs text-gray-400 mt-2">Kamar yang berstatus tersedia</p>
-        </div>
-
-        <div class="bg-white shadow rounded-lg p-4">
-            <h3 class="text-sm text-gray-500">Total Booking</h3>
-            <p class="text-2xl font-bold">{{ $totalBookings ?? 0 }}</p>
-            <p class="text-xs text-gray-400 mt-2">Semua pemesanan</p>
-        </div>
-
-        <div class="bg-white shadow rounded-lg p-4">
-            <h3 class="text-sm text-gray-500">Pendapatan Bulan Ini</h3>
-            <p class="text-2xl font-bold">Rp {{ number_format($monthlyRevenue ?? 0, 0, ',', '.') }}</p>
-            <p class="text-xs text-gray-400 mt-2">Estimasi dari booking bulan berjalan</p>
-        </div>
-
-    </div>
-
-    {{-- SECOND ROW: revenue total + status badges --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
-        <div class="col-span-2 bg-white shadow rounded-lg p-4">
-            <h3 class="text-lg font-semibold mb-3">Pendapatan Total</h3>
-            <div class="flex items-center justify-between">
+        <!-- Pendapatan -->
+        <div class="soft-card">
+            <div class="flex justify-between items-center">
                 <div>
-                    <p class="text-3xl font-bold">Rp {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}</p>
-                    <p class="text-sm text-gray-500 mt-1">Total akumulasi pendapatan dari semua booking</p>
+                    <p class="text-sm text-slate-500">Pendapatan Bulan Ini</p>
+                    <h3 class="text-3xl font-bold mt-1 text-blue-700">
+                        Rp {{ number_format($monthlyRevenue,0,',','.') }}
+                    </h3>
                 </div>
-
-                <div class="grid grid-cols-1 gap-2 text-right">
-                    <span class="text-xs text-gray-500">Rata-rata per booking</span>
-                    @php
-                        $avg = ($totalBookings && $totalBookings > 0) ? intval(($totalRevenue ?? 0) / $totalBookings) : 0;
-                    @endphp
-                    <span class="text-xl font-semibold">Rp {{ number_format($avg, 0, ',', '.') }}</span>
+                <div class="bg-blue-100 p-3 rounded-xl">
+                    <i data-lucide="wallet" class="w-7 h-7 text-blue-600"></i>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white shadow rounded-lg p-4">
-            <h3 class="text-lg font-semibold mb-3">Status Booking</h3>
+        <!-- Total Booking -->
+        <div class="soft-card">
+            <p class="text-sm text-slate-500">Total Booking</p>
+            <h3 class="text-3xl font-bold text-blue-700 mt-1">{{ $totalBookings }}</h3>
 
-            @php
-                $pending = collect($bookings ?? [])->where('status', 'pending')->count();
-                $confirmed = collect($bookings ?? [])->where('status', 'confirmed')->count();
-                $rejected = collect($bookings ?? [])->where('status', 'rejected')->count();
-            @endphp
-
-            <div class="space-y-3">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium">Pending</p>
-                        <p class="text-xs text-gray-500">Menunggu konfirmasi</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="inline-block bg-yellow-100 text-yellow-800 text-sm px-3 py-1 rounded-full">{{ $pending }}</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium">Confirmed</p>
-                        <p class="text-xs text-gray-500">Selesai/terkonfirmasi</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="inline-block bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">{{ $confirmed }}</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium">Rejected</p>
-                        <p class="text-xs text-gray-500">Pembatalan / ditolak</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="inline-block bg-red-100 text-red-800 text-sm px-3 py-1 rounded-full">{{ $rejected }}</span>
-                    </div>
+            <div class="w-full bg-blue-100 h-2 rounded mt-4">
+                <div class="h-2 bg-blue-500 rounded"
+                     style="width: {{ min(100, $totalBookings * 10) }}%">
                 </div>
             </div>
         </div>
 
+        <!-- Pending -->
+        <div class="soft-card">
+            <p class="text-sm text-slate-500">Menunggu Konfirmasi</p>
+            <h3 class="text-3xl font-bold text-blue-700 mt-1">{{ $pendingCount }}</h3>
+            <span class="mt-3 inline-block px-3 py-1 rounded bg-yellow-100 text-yellow-700 text-xs">
+                Pending
+            </span>
+        </div>
+
+        <!-- Kamar -->
+        <div class="soft-card">
+            <p class="text-sm text-slate-500">Kamar Tersedia</p>
+            <h3 class="text-3xl font-bold text-blue-700 mt-1">
+                {{ $availableRooms }} / {{ $totalRooms }}
+            </h3>
+        </div>
+
     </div>
 
-    {{-- GRAFIK: booking & revenue --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- CHARTS -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-8">
 
-<div class="col-span-2 bg-white shadow rounded-lg p-4">
-    <h3 class="text-lg font-semibold mb-3">Grafik Pendapatan (per bulan)</h3>
-    <div style="height:220px;">
-        <canvas id="revenueChart"></canvas>
-    </div>
-</div>
+        <!-- Chart Booking -->
+        <div class="soft-card xl:col-span-2">
+            <h3 class="title-sec mb-4">Grafik Pemesanan</h3>
+            <canvas id="bookingsChart" height="120"></canvas>
+        </div>
 
+        <!-- Chart Revenue -->
+        <div class="soft-card">
+            <h3 class="title-sec mb-4">Pendapatan per Bulan</h3>
+            <canvas id="revenueChart" height="120"></canvas>
+        </div>
 
-<div class="bg-white shadow rounded-lg p-4">
-    <h3 class="text-lg font-semibold mb-3">Grafik Booking (per bulan)</h3>
-    <div style="height:220px;">
-        <canvas id="bookingChart"></canvas>
-    </div>
-</div>
     </div>
 
-    {{-- TOP ROOMS + RECENT BOOKINGS --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- RECENT BOOKINGS -->
+    <div class="soft-card mt-8">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="title-sec">Booking Terbaru</h3>
+            <a href="{{ route('admin.booking.index') }}" class="text-blue-600 text-sm">
+                Lihat semua →
+            </a>
+        </div>
 
-        <div class="col-span-2 bg-white shadow rounded-lg p-4">
-            <h3 class="text-lg font-semibold mb-3">Booking Terbaru</h3>
+        <div class="space-y-4">
+        @foreach($recentBookings as $b)
+            <div class="flex items-start gap-4 p-4 rounded-xl bg-white shadow-sm border">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <i data-lucide="calendar" class="w-6 h-6 text-blue-600"></i>
+                </div>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Penyewa</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Kamar</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Durasi</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Metode</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Harga</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                        </tr>
-                    </thead>
+                <div class="flex-1">
 
-        <tbody class="bg-white divide-y divide-gray-200">
-            @php
-                $recent = collect($bookings ?? [])->sortByDesc('created_at')->values()->take(10);
-            @endphp
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-semibold text-blue-900">
+                                {{ $b['name'] ?? 'Pengguna' }}
+                            </p>
 
-            @forelse ($recent as $i => $b)
-                <tr>
-                    <td class="px-4 py-2 text-sm text-gray-700">{{ $i + 1 }}</td>
+                            <p class="text-xs text-slate-500">
+                                Kamar: {{ $b['room_name'] ?? '-' }}
+                            </p>
+                        </div>
 
-                    <td class="px-4 py-2 text-sm text-gray-700">
-                        {{ $b['user_name'] ?? $b['nama'] ?? ($b['user_email'] ?? '-') }}
-                    </td>
+                        <div class="text-right">
+                            <p class="text-xs text-slate-500">
+                                {{ isset($b['created_at'])
+                                    ? \Carbon\Carbon::parse($b['created_at'])->format('d M Y')
+                                    : '-' }}
+                            </p>
 
-                    {{-- Nama kamar --}}
-                    <td class="px-4 py-2 text-sm text-gray-700">
-                        {{ $b['room_name'] ?? '-' }}
-                    </td>
+                            <p class="font-semibold text-blue-700">
+                                Rp {{ number_format($b['room_price'] ?? 0,0,',','.') }}
+                            </p>
+                        </div>
+                    </div>
 
-                    {{-- Tanggal --}}
-                    <td class="px-4 py-2 text-sm text-gray-700">
-                        {{ \Carbon\Carbon::parse($b['created_at'] ?? now())->format('d M Y H:i') }}
-                    </td>
+                    <span class="px-2 py-1 text-xs rounded mt-2 inline-block
+                        {{ ($b['status'] ?? 'pending') === 'pending'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-green-100 text-green-700' }}">
+                        {{ ucfirst($b['status'] ?? 'pending') }}
+                    </span>
 
-                    {{-- Durasi --}}
-                    <td class="px-4 py-2 text-sm text-gray-700">
-                        {{ $b['duration'] ?? '-' }} hari
-                    </td>
-
-                    {{-- Metode --}}
-                    <td class="px-4 py-2 text-sm text-gray-700">
-                        {{ $b['payment_method'] ?? '-' }}
-                    </td>
-
-                    {{-- Harga --}}
-                    <td class="px-4 py-2 text-sm text-gray-700">
-                        Rp {{ number_format($b['room_price'] ?? 0, 0, ',', '.') }}
-                    </td>
-
-                    {{-- Status --}}
-                    <td class="px-4 py-2 text-sm">
-                        @php $st = $b['status'] ?? 'pending'; @endphp
-                        <span class="px-3 py-1 rounded-full text-xs
-                            {{ $st === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}
-                            {{ $st === 'confirmed' ? 'bg-green-100 text-green-800' : '' }}
-                            {{ $st === 'rejected' ? 'bg-red-100 text-red-800' : '' }}">
-                            {{ ucfirst($st) }}
-                        </span>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="8" class="px-4 py-6 text-center text-gray-500">Belum ada booking.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-</div>
-</div>
-
-        <div class="bg-white shadow rounded-lg p-4">
-            <h3 class="text-lg font-semibold mb-3">Top Kamar Terlaris</h3>
-
-            @if(!empty($topRooms) && count($topRooms) > 0)
-                <ol class="space-y-3">
-                    @foreach($topRooms as $name => $count)
-                        <li class="flex items-center justify-between">
-                            <div>
-                                <p class="font-medium">{{ $name }}</p>
-                                <p class="text-xs text-gray-500">Terpesan {{ $count }}x</p>
-                            </div>
-                        </li>
-                    @endforeach
-                </ol>
-            @else
-                <p class="text-sm text-gray-500">Belum ada data kamar terlaris.</p>
-            @endif
-
-            <div class="mt-4">
-                <a href="{{ route('admin.rooms.index') }}" class="block text-center bg-blue-600 text-white py-2 rounded">Kelola Kamar</a>
+                </div>
             </div>
+        @endforeach
         </div>
 
     </div>
 
 </div>
+
 @endsection
 
-@section('scripts')
-    {{-- Chart.js CDN --}}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script>
-        // === Ambil data dari controller (aman jika kosong) ===
-        const revenueData = @json($revenueChart ?? []);
-        const bookingData = @json($bookingChart ?? []);
+@push('scripts')
+<script>
+    const labels      = @json(array_keys($bookingChart));
+    const bookingData = @json(array_values($bookingChart));
+    const revenueData = @json(array_values($revenueChart));
 
-        // Fungsi bantu untuk convert object (Y-m => value) ke labels & values
-        function objToLabelsValues(obj) {
-            const labels = [];
-            const values = [];
-            for (const k of Object.keys(obj)) {
-                labels.push(k);
-                values.push(obj[k]);
-            }
-            return { labels, values };
-        }
-
-// ----------------------------
-// Revenue Chart (Line)
-// ----------------------------
-(function () {
-    const ctx = document.getElementById('revenueChart');
-    if (!ctx) return;
-
-    const { labels, values } = objToLabelsValues(revenueData);
-
-    new Chart(ctx.getContext('2d'), {
+    new Chart(document.getElementById('bookingsChart'), {
         type: 'line',
         data: {
-            labels: labels,
+            labels,
             datasets: [{
-                label: 'Pendapatan (Rp)',
-                data: values,
-                tension: 0.35,
-                borderWidth: 2,
-                fill: false
+                label: 'Booking',
+                data: bookingData,
+                fill: true,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59,130,246,0.15)',
+                tension: .35
             }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return value.toLocaleString('id-ID');
-                        }
-                    }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const val = context.parsed.y ?? context.parsed;
-                            return 'Rp ' + val.toLocaleString('id-ID');
-                        }
-                    }
-                },
-                legend: { display: false }
-            }
         }
     });
-})();
 
-
-        // ----------------------------
-        // Booking Chart (Line)
-        // ----------------------------
-        (function () {
-            const ctx = document.getElementById('bookingChart');
-            if (!ctx) return;
-
-            const { labels, values } = objToLabelsValues(bookingData);
-
-            new Chart(ctx.getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Jumlah Booking',
-                        data: values,
-                        tension: 0.35,
-                        fill: true,
-                        borderWidth: 2,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
-        })();
-    </script>
-@endsection
+    new Chart(document.getElementById('revenueChart'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Pendapatan',
+                data: revenueData,
+                backgroundColor: 'rgba(99,102,241,0.7)',
+                borderRadius: 10
+            }]
+        }
+    });
+</script>
+@endpush

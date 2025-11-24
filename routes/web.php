@@ -41,3 +41,17 @@ Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('register', [AuthController::class, 'showRegisterForm'])->name('register');
 // Proses register
 Route::post('register', [AuthController::class, 'register']);
+
+
+// ================== PERBAIKAN PENTING ==================
+// Lindungi /storage agar tidak ditelan route lainnya
+Route::get('/storage/{path}', function () {
+    abort(404);
+})->where('path', '.*');
+
+// ================== JIKA ADA SPA/FALLBACK ROUTE, TARUH PALING BAWAH ================
+/*
+Route::get('{any}', function () {
+    return view('welcome');
+})->where('any', '^(?!storage).*$'); 
+*/

@@ -20,7 +20,7 @@ class RoomController extends Controller
     }
 
     // ========================
-    // INDEX - tampil semua kamar
+    // INDEX
     // ========================
     public function index()
     {
@@ -31,12 +31,11 @@ class RoomController extends Controller
             ])->get("{$this->supabaseUrl}/rest/v1/{$this->table}?order=created_at.desc");
 
             if ($response->failed()) {
-                return back()->with('error', 'Gagal mengambil data kamar: ' . $response->body());
+                return back()->with('error', 'Gagal mengambil data kamar: Internal server error.');
             }
 
             $rooms = $response->json();
 
-            // convert facilities dari JSON string ke array
             foreach ($rooms as &$room) {
                 if (!empty($room['facilities']) && is_string($room['facilities'])) {
                     $room['facilities'] = json_decode($room['facilities'], true);
@@ -45,12 +44,12 @@ class RoomController extends Controller
 
             return view('admin.rooms.index', compact('rooms'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan koneksi: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
     // ========================
-    // CREATE - form tambah kamar
+    // CREATE
     // ========================
     public function create()
     {
@@ -58,61 +57,51 @@ class RoomController extends Controller
     }
 
     // ========================
-    // STORE - simpan kamar baru
+    // STORE
     // ========================
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required',
             'price' => 'required|numeric',
             'capacity' => 'required|integer',
-            'status' => 'required|string',
-            'description' => 'nullable|string',
+            'status' => 'required',
+            'location' => 'required',
             'facilities' => 'nullable|string',
-            'location' => 'nullable|string',
-            'image' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+            'image' => 'required|image'
         ]);
 
-        // =====================
-        // Upload gambar LOKAL
-        // =====================
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('public/rooms', $filename);
+        // Upload image ke storage lokal
+        $path = $request->file('image')->store('rooms', 'public');
 
-            // simpan NAMA FILE saja, bukan /storage/rooms/...
-            $validated['image'] = $filename;
-        } else {
-            $validated['image'] = null;
+        // JSON facilities
+        $validated['facilities'] = !empty($validated['facilities'])
+            ? json_encode(array_map('trim', explode(',', $validated['facilities'])))
+            : json_encode([]);
+
+        // Simpan ke Supabase (image = rooms/xxx.jpg)
+        $payload = [
+            'name'       => $validated['name'],
+            'price'      => $validated['price'],
+            'capacity'   => $validated['capacity'],
+            'status'     => $validated['status'],
+            'location'   => $validated['location'],
+            'facilities' => $validated['facilities'],
+            'image'      => $path
+        ];
+
+        $response = Http::withHeaders([
+            'apikey' => $this->supabaseKey,
+            'Authorization' => 'Bearer ' . $this->supabaseKey,
+            'Content-Type' => 'application/json',
+            'Prefer' => 'return=minimal'
+        ])->post("{$this->supabaseUrl}/rest/v1/{$this->table}", $payload);
+
+        if ($response->failed()) {
+            return back()->with('error', 'Gagal menyimpan kamar: ' . $response->body());
         }
 
-        // Konversi facilities string ke JSON array
-        if (!empty($validated['facilities'])) {
-            $validated['facilities'] = json_encode(
-                array_map('trim', explode(',', $validated['facilities']))
-            );
-        }
-
-        // =====================
-        // Simpan ke Supabase
-        // =====================
-        try {
-            $response = Http::withHeaders([
-                'apikey' => $this->supabaseKey,
-                'Authorization' => 'Bearer ' . $this->supabaseKey,
-                'Content-Type' => 'application/json',
-                'Prefer' => 'return=representation',
-            ])->post("{$this->supabaseUrl}/rest/v1/{$this->table}", $validated);
-
-            if ($response->failed()) {
-                return back()->with('error', 'Gagal menambah kamar: ' . $response->body());
-            }
-
-            return redirect()->route('admin.rooms.index')->with('success', 'Kamar berhasil ditambahkan.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan koneksi: ' . $e->getMessage());
-        }
+        return redirect()->route('admin.rooms.index')->with('success', 'Kamar berhasil ditambahkan.');
     }
 
     // ========================
@@ -138,7 +127,7 @@ class RoomController extends Controller
 
             return view('admin.rooms.edit', compact('room'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan koneksi: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -155,44 +144,46 @@ class RoomController extends Controller
             'description' => 'nullable|string',
             'facilities' => 'nullable|string',
             'location' => 'nullable|string',
-            'image' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+            'image' => 'nullable|image|max:2048',
         ]);
 
-        // Upload gambar baru jika ada
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('public/rooms', $filename);
-            $validated['image'] = $filename;
-        } else {
-            unset($validated['image']); // jangan update kolom image
-        }
+        $updateData = [
+            'name'     => $validated['name'],
+            'price'    => $validated['price'],
+            'capacity' => $validated['capacity'],
+            'status'   => $validated['status'],
+            'location' => $validated['location'],
+            'description' => $validated['description'] ?? null,
+        ];
 
+        // facilities
         if (!empty($validated['facilities'])) {
-            $validated['facilities'] = json_encode(
+            $updateData['facilities'] = json_encode(
                 array_map('trim', explode(',', $validated['facilities']))
             );
         }
 
-        try {
-            $response = Http::withHeaders([
-                'apikey' => $this->supabaseKey,
-                'Authorization' => 'Bearer ' . $this->supabaseKey,
-                'Content-Type' => 'application/json',
-            ])->patch("{$this->supabaseUrl}/rest/v1/{$this->table}?id=eq.{$id}", $validated);
-
-            if ($response->failed()) {
-                return back()->with('error', 'Gagal memperbarui kamar: ' . $response->body());
-            }
-
-            return redirect()->route('admin.rooms.index')->with('success', 'Kamar berhasil diperbarui.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan koneksi: ' . $e->getMessage());
+        // Jika upload gambar baru
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('rooms', 'public');
+            $updateData['image'] = $path;
         }
+
+        $response = Http::withHeaders([
+            'apikey' => $this->supabaseKey,
+            'Authorization' => 'Bearer ' . $this->supabaseKey,
+            'Content-Type' => 'application/json',
+        ])->patch("{$this->supabaseUrl}/rest/v1/{$this->table}?id=eq.{$id}", $updateData);
+
+        if ($response->failed()) {
+            return back()->with('error', 'Gagal memperbarui kamar: ' . $response->body());
+        }
+
+        return redirect()->route('admin.rooms.index')->with('success', 'Kamar berhasil diperbarui.');
     }
 
     // ========================
-    // DESTROY
+    // DELETE
     // ========================
     public function destroy($id)
     {
@@ -208,7 +199,7 @@ class RoomController extends Controller
 
             return redirect()->route('admin.rooms.index')->with('success', 'Kamar berhasil dihapus.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan koneksi: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 }

@@ -35,40 +35,76 @@
                 @forelse ($rooms as $room)
                     <tr class="border-b hover:bg-gray-50 transition">
                         <td class="px-4 py-3">
+
+                            {{-- FIX BAGIAN IMAGE DI SINI --}}
                             @php
                                 $image = $room['image'] ?? null;
-                                $imagePath = $image 
-                                    ? (filter_var($image, FILTER_VALIDATE_URL) ? $image : asset('storage/rooms/' . $image))
-                                    : null;
+                                $imagePath = null;
+
+                                if (!empty($image)) {
+                                    if (filter_var($image, FILTER_VALIDATE_URL)) {
+                                        $imagePath = $image;
+                                    } else {
+                                        // image disimpan dengan format: rooms/namafile.jpg
+                                        $imagePath = asset('storage/' . $image);
+                                    }
+                                }
                             @endphp
+
                             @if($imagePath)
-                                <img src="{{ $imagePath }}" alt="{{ $room['name'] ?? 'Kamar' }}" class="w-24 h-16 object-cover rounded">
+                                <img src="{{ $imagePath }}" 
+                                     alt="{{ $room['name'] ?? 'Kamar' }}" 
+                                     class="w-24 h-16 object-cover rounded">
                             @else
-                                <div class="w-24 h-16 bg-gray-200 flex items-center justify-center rounded text-gray-500">No Image</div>
+                                <div class="w-24 h-16 bg-gray-200 flex items-center justify-center rounded text-gray-500">
+                                    No Image
+                                </div>
                             @endif
                         </td>
+
                         <td class="px-4 py-3 font-semibold">{{ $room['name'] ?? '-' }}</td>
                         <td class="px-4 py-3">{{ isset($room['price']) ? 'Rp ' . number_format($room['price'],0,',','.') : '-' }}</td>
                         <td class="px-4 py-3">{{ $room['capacity'] ?? '-' }} org</td>
+
                         <td class="px-4 py-3">
                             @php $status = $room['status'] ?? 'unknown'; @endphp
-                            <span class="px-3 py-1 rounded-full text-white text-xs {{ $status === 'available' ? 'bg-green-600' : ($status === 'unavailable' ? 'bg-red-500' : 'bg-gray-400') }}">{{ ucfirst($status) }}</span>
+                            <span class="px-3 py-1 rounded-full text-white text-xs 
+                                {{ $status === 'available' ? 'bg-green-600' : ($status === 'unavailable' ? 'bg-red-500' : 'bg-gray-400') }}">
+                                {{ ucfirst($status) }}
+                            </span>
                         </td>
-                        <td class="px-4 py-3">{{ !empty($room['facilities']) ? implode(', ', (array)$room['facilities']) : '-' }}</td>
+
+                        <td class="px-4 py-3">
+                            {{ !empty($room['facilities']) ? implode(', ', (array)$room['facilities']) : '-' }}
+                        </td>
+
                         <td class="px-4 py-3">{{ $room['location'] ?? '-' }}</td>
+
                         <td class="px-4 py-3">
                             <div class="flex gap-2 justify-center">
-                                <a href="{{ route('admin.rooms.edit', $room['id']) }}" class="px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition">Edit</a>
-                                <form action="{{ route('admin.rooms.destroy', $room['id']) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus kamar ini?')">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">Hapus</button>
+                                <a href="{{ route('admin.rooms.edit', $room['id']) }}" 
+                                   class="px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition">
+                                    Edit
+                                </a>
+
+                                <form action="{{ route('admin.rooms.destroy', $room['id']) }}" 
+                                      method="POST" 
+                                      onsubmit="return confirm('Yakin ingin menghapus kamar ini?')">
+                                    @csrf 
+                                    @method('DELETE')
+                                    <button type="submit" 
+                                            class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">
+                                        Hapus
+                                    </button>
                                 </form>
                             </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-4 py-6 text-center text-gray-500">Belum ada data kamar.</td>
+                        <td colspan="8" class="px-4 py-6 text-center text-gray-500">
+                            Belum ada data kamar.
+                        </td>
                     </tr>
                 @endforelse
             </tbody>

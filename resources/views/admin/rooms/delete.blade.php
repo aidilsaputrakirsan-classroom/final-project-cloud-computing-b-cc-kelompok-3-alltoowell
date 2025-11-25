@@ -1,50 +1,38 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('title', 'Hapus Kamar')
+@section('title','Hapus Kamar')
 
 @section('content')
-<div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6 mt-10">
-    <h1 class="text-2xl font-bold mb-6 text-center text-purple-700">
-        Konfirmasi Hapus Kamar
-    </h1>
+<div class="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-xl mt-10 border">
 
-    <div class="bg-gray-100 p-4 rounded-lg mb-6">
-        <p class="text-gray-700 mb-4">Apakah kamu yakin ingin menghapus kamar berikut?</p>
+    <h1 class="text-2xl font-bold text-blue-900 mb-4 text-center">Konfirmasi Hapus Kamar</h1>
 
-        <div class="border border-gray-300 rounded-md p-4 space-y-2">
-            <p><strong>Nama:</strong> {{ $room['name'] ?? '-' }}</p>
-            <p><strong>Harga:</strong> Rp {{ isset($room['price']) ? number_format($room['price'], 0, ',', '.') : '-' }}</p>
-            <p><strong>Kapasitas:</strong> {{ $room['capacity'] ?? '-' }} orang</p>
-            <p><strong>Status:</strong> {{ ucfirst($room['status'] ?? '-') }}</p>
-            <p><strong>Deskripsi:</strong> {{ $room['description'] ?? '-' }}</p>
-            <p><strong>Fasilitas:</strong>
-                @if (!empty($room['facilities']))
-                    {{ is_array($room['facilities']) ? implode(', ', $room['facilities']) : $room['facilities'] }}
-                @else
-                    -
-                @endif
-            </p>
-            <p><strong>Lokasi:</strong> {{ $room['location'] ?? '-' }}</p>
-        </div>
+    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
+        <p class="mb-2"><strong>Nama:</strong> {{ $room['name'] }}</p>
+        <p class="mb-2"><strong>Harga:</strong> Rp {{ number_format($room['price'],0,',','.') }}</p>
+        <p class="mb-2"><strong>Kapasitas:</strong> {{ $room['capacity'] }} orang</p>
+        <p class="mb-2"><strong>Status:</strong> {{ ucfirst($room['status']) }}</p>
+        <p class="mb-2"><strong>Lokasi:</strong> {{ $room['location'] }}</p>
     </div>
 
     <div class="flex justify-end gap-3">
-        {{-- Tombol batal --}}
-        <a href="{{ route('admin.rooms.index') }}" 
-           class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition">
+        <a href="{{ route('admin.rooms.index') }}"
+           class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500">
            Batal
         </a>
 
-        {{-- Tombol hapus --}}
-        <form action="{{ route('admin.rooms.destroy', $room['id'] ?? '') }}" method="POST"
-              onsubmit="return confirm('Yakin ingin menghapus kamar ini?');">
+        <form action="{{ route('admin.rooms.destroy', $room['id']) }}"
+              method="POST" onsubmit="return confirm('Yakin hapus?')">
+
             @csrf
             @method('DELETE')
-            <button type="submit" 
-                    class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">
+
+            <button type="submit"
+                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
                 Ya, Hapus
             </button>
         </form>
     </div>
+
 </div>
 @endsection

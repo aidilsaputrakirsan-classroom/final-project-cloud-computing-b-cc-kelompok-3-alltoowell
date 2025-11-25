@@ -20,7 +20,7 @@ class DashboardController extends Controller
         $rooms = $this->supabase->getAllRooms();
         $bookings = $this->supabase->getAllBookingsSimple();
 
-        // Map harga & nama kamar
+        // Map room data
         $roomMap = [];
         foreach ($rooms as $room) {
             $roomMap[$room['id']] = [
@@ -29,12 +29,18 @@ class DashboardController extends Controller
             ];
         }
 
-        // Gabungkan room info ke booking
+        // Gabungkan data room ke booking + fallback
         $bookings = array_map(function ($b) use ($roomMap) {
+
             $rid = $b['room_id'] ?? null;
 
             $b['room_price'] = $roomMap[$rid]['price'] ?? 0;
             $b['room_name']  = $roomMap[$rid]['name'] ?? '-';
+
+            // Fallback tambahan biar aman
+            $b['name']       = $b['name'] ?? 'Pengguna';
+            $b['status']     = $b['status'] ?? 'unknown';
+            $b['created_at'] = $b['created_at'] ?? null;
 
             return $b;
         }, $bookings);
@@ -54,26 +60,22 @@ class DashboardController extends Controller
         $roomPopularity = [];
 
         foreach ($validBookings as $b) {
+
             $rid = $b['room_id'] ?? null;
             $price = $roomMap[$rid]['price'] ?? 0;
 
-            // Total revenue
             $totalRevenue += $price;
 
-            // Revenue bulan ini
-            if (isset($b['created_at']) && str_starts_with($b['created_at'], $currentMonth)) {
+            if ($b['created_at'] && str_starts_with($b['created_at'], $currentMonth)) {
                 $monthlyRevenue += $price;
             }
 
-            // Grafik bulanan
-            if (isset($b['created_at'])) {
+            if ($b['created_at']) {
                 $monthKey = date('Y-m', strtotime($b['created_at']));
-
                 $bookingChart[$monthKey] = ($bookingChart[$monthKey] ?? 0) + 1;
                 $revenueChart[$monthKey] = ($revenueChart[$monthKey] ?? 0) + $price;
             }
 
-            // Popularitas kamar
             $roomPopularity[$roomMap[$rid]['name']] =
                 ($roomPopularity[$roomMap[$rid]['name']] ?? 0) + 1;
         }
@@ -83,21 +85,20 @@ class DashboardController extends Controller
         ksort($revenueChart);
         arsort($roomPopularity);
 
-        // Kamar tersedia (confirmed mengunci kamar)
+        // Hitung kamar tersedia
         $bookedRoomIds = array_column($validBookings, 'room_id');
         $availableRooms = array_filter($rooms, fn($room) =>
             !in_array($room['id'], $bookedRoomIds)
         );
 
-        // Pending count
+        // Pending
         $pendingCount = count(array_filter($bookings, fn($b) =>
             ($b['status'] ?? '') === 'pending'
         ));
 
-        // Recent booking (limit 6)
+        // Recent booking max 6 agar tidak error
         $recentBookings = array_slice($bookings, 0, 6);
 
-        // Kirim ke view
         return view('admin.dashboard', [
             'rooms'            => $rooms,
             'bookings'         => $bookings,

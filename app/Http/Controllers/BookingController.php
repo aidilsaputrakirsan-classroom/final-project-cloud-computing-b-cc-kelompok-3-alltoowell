@@ -39,11 +39,10 @@ class BookingController extends Controller
     }
 
     /**
-     * SIMPAN BOOKING ↗️ KE SUPABASE
+     * SIMPAN BOOKING KE SUPABASE
      */
     public function store(Request $request, $id)
     {
-        // Validasi input form
         $request->validate([
             'start_date'      => 'required|date',
             'duration'        => 'required|integer|min:1',
@@ -82,7 +81,6 @@ class BookingController extends Controller
             'Prefer'        => 'return=representation'
         ])->post("{$this->supabaseUrl}/rest/v1/bookings", $payload);
 
-        // Debug error Supabase
         if ($response->failed()) {
             dd([
                 'status'  => $response->status(),
@@ -91,7 +89,42 @@ class BookingController extends Controller
             ]);
         }
 
-        return redirect('/')
-            ->with('success', 'Booking berhasil disimpan!');
+        // Arahkan user ke halaman daftar pesanan
+        return redirect()->route('user.bookings')
+            ->with('success', 'Booking berhasil dibuat. Silakan tunggu konfirmasi.');
+    }
+
+
+    /**
+     * TAMPILKAN PESANAN USER
+     */
+    public function userBookings()
+    {
+        if (!session('user_id')) {
+            return redirect('/login')->with('error', 'Silakan login dulu.');
+        }
+
+        $userId = session('user_id');
+
+        // Ambil semua booking milik user
+        $bookings = Http::withHeaders([
+            'apikey'        => $this->supabaseKey,
+            'Authorization' => 'Bearer ' . $this->supabaseKey,
+        ])->get("{$this->supabaseUrl}/rest/v1/bookings?user_id=eq.$userId&select=*")->json() ?? [];
+
+        // Ambil semua kamar
+        $roomsData = Http::withHeaders([
+            'apikey'        => $this->supabaseKey,
+            'Authorization' => 'Bearer ' . $this->supabaseKey,
+        ])->get("{$this->supabaseUrl}/rest/v1/rooms")->json();
+
+        $roomMap = collect($roomsData)->keyBy('id')->toArray();
+
+        // Gabungkan room ke booking
+        foreach ($bookings as &$b) {
+            $b['room'] = $roomMap[$b['room_id']] ?? null;
+        }
+
+        return view('booking.my-bookings', compact('bookings'));
     }
 }

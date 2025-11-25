@@ -3,17 +3,19 @@
 @section('title', 'Login')
 
 @section('content')
-<div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <div class="w-full max-w-4xl bg-white shadow-lg rounded-xl grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-blue-50 to-blue-100">
 
+    <div class="w-full max-w-4xl bg-white shadow-2xl rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+
+        {{-- LEFT SIDE – FORM --}}
         <div class="px-10 py-14 flex flex-col justify-center">
-            <h2 class="text-3xl font-bold mb-8 text-gray-800 text-center">Sign In</h2>
+            <h2 class="text-4xl font-extrabold mb-8 text-blue-900 text-center tracking-wide">Masuk</h2>
 
             <form action="{{ route('login') }}" method="POST">
                 @csrf
 
                 <input type="email" name="email"
-                    class="w-full p-3 rounded-md bg-gray-100 mb-4 text-sm"
+                    class="w-full p-3 rounded-xl bg-blue-50 border border-blue-200 mb-4 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
                     placeholder="Email" value="{{ old('email') }}">
 
                 @error('email')
@@ -21,27 +23,28 @@
                 @enderror
 
                 <input type="password" name="password"
-                    class="w-full p-3 rounded-md bg-gray-100 mb-6 text-sm"
+                    class="w-full p-3 rounded-xl bg-blue-50 border border-blue-200 mb-6 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
                     placeholder="Password">
 
                 @error('password')
                     <p class="text-red-500 text-xs mb-2">{{ $message }}</p>
                 @enderror
 
-                <button class="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 rounded-full font-semibold">
+                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold text-sm transition shadow-md">
                     SIGN IN
                 </button>
             </form>
         </div>
 
-        <div class="bg-gradient-to-br from-purple-400 to-purple-600 text-white flex flex-col items-center justify-center p-10">
+        {{-- RIGHT SIDE – WELCOME --}}
+        <div class="bg-gradient-to-br from-blue-500 to-blue-700 text-white flex flex-col items-center justify-center p-10">
             <h2 class="text-3xl font-bold mb-4">Halo, Teman!</h2>
-            <p class="mb-6 text-center opacity-90">
-                Daftarkan diri Anda dan mulai gunakan layanan kami segera.
+            <p class="mb-6 text-center opacity-90 text-sm">
+                Daftarkan dirimu dan mulai gunakan layanan kami sekarang.
             </p>
 
             <a href="{{ route('register') }}"
-                class="border border-white px-6 py-2 rounded-full hover:bg-white hover:text-purple-600 transition font-semibold">
+                class="border-2 border-white px-8 py-2 rounded-xl hover:bg-white hover:text-blue-700 transition font-semibold text-sm shadow-lg">
                 SIGN UP
             </a>
         </div>

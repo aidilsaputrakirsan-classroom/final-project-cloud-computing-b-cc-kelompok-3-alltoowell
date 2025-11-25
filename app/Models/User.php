@@ -2,31 +2,39 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasUuids, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
+     * Nama tabel dalam database.
+     */
+    protected $table = 'users';
+
+    /**
+     * Kolom primary key menggunakan UUID (string, bukan auto increment).
+     */
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    /**
+     * Kolom yang dapat diisi massal.
      */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'phone',
+        'role',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
+     * Kolom yang harus disembunyikan saat model diubah menjadi array/json.
      */
     protected $hidden = [
         'password',
@@ -34,15 +42,30 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Tipe data otomatis untuk casting.
      */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    /**
+     * Event model untuk membuat UUID otomatis.
+     */
+    protected static function boot()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = (string) Str::uuid();
+            }
+
+            // Pastikan password di-hash otomatis saat create
+            if (!empty($model->password) && !Str::startsWith($model->password, '$2y$')) {
+                $model->password = bcrypt($model->password);
+            }
+        });
     }
 }

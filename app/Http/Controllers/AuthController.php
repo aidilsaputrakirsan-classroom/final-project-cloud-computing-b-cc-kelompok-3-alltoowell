@@ -54,8 +54,8 @@ class AuthController extends Controller
         ]);
 
         if ($response->failed()) {
-            $errorMessage = $response->json('message') ?? 'Gagal registrasi ke Supabase.';
-            throw ValidationException::withMessages(['email' => $errorMessage]);
+            $error = $response->json('message') ?? 'Gagal registrasi ke Supabase.';
+            throw ValidationException::withMessages(['email' => $error]);
         }
 
         return redirect('/login')->with('success', 'Registrasi berhasil! Silakan login.');
@@ -100,6 +100,7 @@ class AuthController extends Controller
             ]);
         }
 
+        // SIMPAN SESSION
         session([
             'user_id'    => $user['id'],
             'user_name'  => $user['name'],

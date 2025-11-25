@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use App\Helpers\ActivityLogger;
 
 class RoomController extends Controller
 {
@@ -24,28 +25,19 @@ class RoomController extends Controller
     // ========================
     public function index()
     {
-        try {
-            $response = Http::withHeaders([
-                'apikey' => $this->supabaseKey,
-                'Authorization' => 'Bearer ' . $this->supabaseKey,
-            ])->get("{$this->supabaseUrl}/rest/v1/{$this->table}?order=created_at.desc");
+        $response = Http::withHeaders([
+            'apikey' => $this->supabaseKey,
+            'Authorization' => 'Bearer ' . $this->supabaseKey,
+        ])->get("{$this->supabaseUrl}/rest/v1/{$this->table}?order=created_at.desc");
 
-            if ($response->failed()) {
-                return back()->with('error', 'Gagal mengambil data kamar: Internal server error.');
-            }
+        $rooms = $response->json();
 
-            $rooms = $response->json();
+        ActivityLogger::log(
+            'admin_open_rooms',
+            'Admin membuka halaman daftar rooms'
+        );
 
-            foreach ($rooms as &$room) {
-                if (!empty($room['facilities']) && is_string($room['facilities'])) {
-                    $room['facilities'] = json_decode($room['facilities'], true);
-                }
-            }
-
-            return view('admin.rooms.index', compact('rooms'));
-        } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
+        return view('admin.rooms.index', compact('rooms'));
     }
 
     // ========================
@@ -53,11 +45,16 @@ class RoomController extends Controller
     // ========================
     public function create()
     {
+        ActivityLogger::log(
+            'admin_open_create_room',
+            'Admin membuka halaman tambah room'
+        );
+
         return view('admin.rooms.create');
     }
 
     // ========================
-    // STORE
+    // STORE (FIXED)
     // ========================
     public function store(Request $request)
     {
@@ -71,15 +68,15 @@ class RoomController extends Controller
             'image' => 'required|image'
         ]);
 
-        // Upload image ke storage lokal
+        // Upload image
         $path = $request->file('image')->store('rooms', 'public');
 
-        // JSON facilities
+        // facilities JSON
         $validated['facilities'] = !empty($validated['facilities'])
             ? json_encode(array_map('trim', explode(',', $validated['facilities'])))
             : json_encode([]);
 
-        // Simpan ke Supabase (image = rooms/xxx.jpg)
+        // FIXED → payload dibuat lengkap
         $payload = [
             'name'       => $validated['name'],
             'price'      => $validated['price'],
@@ -101,34 +98,42 @@ class RoomController extends Controller
             return back()->with('error', 'Gagal menyimpan kamar: ' . $response->body());
         }
 
+        ActivityLogger::log(
+            'admin_create_room',
+            'Admin menambahkan room baru',
+            ['room_name' => $validated['name']]
+        );
+
         return redirect()->route('admin.rooms.index')->with('success', 'Kamar berhasil ditambahkan.');
     }
 
     // ========================
-    // EDIT
+    // EDIT (FIXED)
     // ========================
     public function edit($id)
     {
-        try {
-            $response = Http::withHeaders([
-                'apikey' => $this->supabaseKey,
-                'Authorization' => 'Bearer ' . $this->supabaseKey,
-            ])->get("{$this->supabaseUrl}/rest/v1/{$this->table}?id=eq.{$id}");
+        $response = Http::withHeaders([
+            'apikey' => $this->supabaseKey,
+            'Authorization' => 'Bearer ' . $this->supabaseKey,
+        ])->get("{$this->supabaseUrl}/rest/v1/{$this->table}?id=eq.$id");
 
-            if ($response->failed() || empty($response->json())) {
-                return back()->with('error', 'Kamar tidak ditemukan.');
-            }
-
-            $room = $response->json()[0];
-
-            if (!empty($room['facilities']) && is_string($room['facilities'])) {
-                $room['facilities'] = json_decode($room['facilities'], true);
-            }
-
-            return view('admin.rooms.edit', compact('room'));
-        } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        if ($response->failed() || empty($response->json())) {
+            return back()->with('error', 'Kamar tidak ditemukan.');
         }
+
+        $room = $response->json()[0];
+
+        if (!empty($room['facilities']) && is_string($room['facilities'])) {
+            $room['facilities'] = json_decode($room['facilities'], true);
+        }
+
+        ActivityLogger::log(
+            'admin_open_edit_room',
+            'Admin membuka halaman edit room',
+            ['room_id' => $id]
+        );
+
+        return view('admin.rooms.edit', compact('room'));
     }
 
     // ========================
@@ -137,14 +142,14 @@ class RoomController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required',
             'price' => 'required|numeric',
             'capacity' => 'required|integer',
-            'status' => 'required|string',
+            'status' => 'required',
+            'location' => 'nullable|string',
             'description' => 'nullable|string',
             'facilities' => 'nullable|string',
-            'location' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image'
         ]);
 
         $updateData = [
@@ -156,14 +161,10 @@ class RoomController extends Controller
             'description' => $validated['description'] ?? null,
         ];
 
-        // facilities
         if (!empty($validated['facilities'])) {
-            $updateData['facilities'] = json_encode(
-                array_map('trim', explode(',', $validated['facilities']))
-            );
+            $updateData['facilities'] = json_encode(array_map('trim', explode(',', $validated['facilities'])));
         }
 
-        // Jika upload gambar baru
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('rooms', 'public');
             $updateData['image'] = $path;
@@ -173,11 +174,17 @@ class RoomController extends Controller
             'apikey' => $this->supabaseKey,
             'Authorization' => 'Bearer ' . $this->supabaseKey,
             'Content-Type' => 'application/json',
-        ])->patch("{$this->supabaseUrl}/rest/v1/{$this->table}?id=eq.{$id}", $updateData);
+        ])->patch("{$this->supabaseUrl}/rest/v1/{$this->table}?id=eq.$id", $updateData);
 
         if ($response->failed()) {
             return back()->with('error', 'Gagal memperbarui kamar: ' . $response->body());
         }
+
+        ActivityLogger::log(
+            'admin_update_room',
+            'Admin memperbarui room',
+            ['room_id' => $id]
+        );
 
         return redirect()->route('admin.rooms.index')->with('success', 'Kamar berhasil diperbarui.');
     }
@@ -187,19 +194,17 @@ class RoomController extends Controller
     // ========================
     public function destroy($id)
     {
-        try {
-            $response = Http::withHeaders([
-                'apikey' => $this->supabaseKey,
-                'Authorization' => 'Bearer ' . $this->supabaseKey,
-            ])->delete("{$this->supabaseUrl}/rest/v1/{$this->table}?id=eq.{$id}");
+        Http::withHeaders([
+            'apikey' => $this->supabaseKey,
+            'Authorization' => 'Bearer ' . $this->supabaseKey,
+        ])->delete("{$this->supabaseUrl}/rest/v1/{$this->table}?id=eq.$id");
 
-            if ($response->failed()) {
-                return back()->with('error', 'Gagal menghapus kamar: ' . $response->body());
-            }
+        ActivityLogger::log(
+            'admin_delete_room',
+            'Admin menghapus room',
+            ['room_id' => $id]
+        );
 
-            return redirect()->route('admin.rooms.index')->with('success', 'Kamar berhasil dihapus.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
+        return redirect()->route('admin.rooms.index')->with('success', 'Kamar berhasil dihapus.');
     }
 }

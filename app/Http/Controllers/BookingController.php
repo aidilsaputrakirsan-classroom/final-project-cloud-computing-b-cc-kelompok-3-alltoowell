@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use App\Helpers\ActivityLogger;
 
 class BookingController extends Controller
 {
@@ -18,7 +19,7 @@ class BookingController extends Controller
     }
 
     /**
-     * TAMPILKAN FORM BOOKING
+     * USER MELIHAT FORM BOOKING
      */
     public function show($id)
     {
@@ -35,11 +36,20 @@ class BookingController extends Controller
 
         $room = $data[0];
 
+        // ACTIVITY LOG
+        if (session('user_id')) {
+            ActivityLogger::log(
+                'view_booking_form',
+                'User membuka halaman booking',
+                ['room_id' => $id]
+            );
+        }
+
         return view('booking.index', compact('room'));
     }
 
     /**
-     * SIMPAN BOOKING KE SUPABASE
+     * USER MENAMBAH BOOKING
      */
     public function store(Request $request, $id)
     {
@@ -49,16 +59,15 @@ class BookingController extends Controller
             'payment_method'  => 'required|string',
         ]);
 
-        // Pastikan user login
         if (!session('user_id')) {
             return redirect('/login')->with('error', 'Silakan login dulu.');
         }
 
-        // Generate ID booking
+        // Generate ID unik booking
         $uuid       = (string) Str::uuid();
         $bookingId  = 'BK-' . strtoupper(Str::random(6));
 
-        // Data booking
+        // Payload ke Supabase
         $payload = [
             'id'             => $uuid,
             'booking_id'     => $bookingId,
@@ -73,7 +82,6 @@ class BookingController extends Controller
             'status'         => 'pending',
         ];
 
-        // Kirim ke Supabase
         $response = Http::withHeaders([
             'apikey'        => $this->supabaseKey,
             'Authorization' => 'Bearer ' . $this->supabaseKey,
@@ -89,14 +97,24 @@ class BookingController extends Controller
             ]);
         }
 
-        // Arahkan user ke halaman daftar pesanan
+        // ACTIVITY LOG
+        ActivityLogger::log(
+            'create_booking',
+            'User membuat booking baru',
+            [
+                'booking_id' => $bookingId,
+                'room_id' => $id,
+                'duration' => $request->duration,
+                'payment_method' => $request->payment_method
+            ]
+        );
+
         return redirect()->route('user.bookings')
             ->with('success', 'Booking berhasil dibuat. Silakan tunggu konfirmasi.');
     }
 
-
     /**
-     * TAMPILKAN PESANAN USER
+     * USER MELIHAT LIST BOOKING
      */
     public function userBookings()
     {
@@ -106,13 +124,13 @@ class BookingController extends Controller
 
         $userId = session('user_id');
 
-        // Ambil semua booking milik user
+        // Ambil booking user
         $bookings = Http::withHeaders([
             'apikey'        => $this->supabaseKey,
             'Authorization' => 'Bearer ' . $this->supabaseKey,
         ])->get("{$this->supabaseUrl}/rest/v1/bookings?user_id=eq.$userId&select=*")->json() ?? [];
 
-        // Ambil semua kamar
+        // Ambil kamar
         $roomsData = Http::withHeaders([
             'apikey'        => $this->supabaseKey,
             'Authorization' => 'Bearer ' . $this->supabaseKey,
@@ -120,10 +138,15 @@ class BookingController extends Controller
 
         $roomMap = collect($roomsData)->keyBy('id')->toArray();
 
-        // Gabungkan room ke booking
         foreach ($bookings as &$b) {
             $b['room'] = $roomMap[$b['room_id']] ?? null;
         }
+
+        // ACTIVITY LOG
+        ActivityLogger::log(
+            'view_user_bookings',
+            'User membuka halaman daftar booking'
+        );
 
         return view('booking.my-bookings', compact('bookings'));
     }

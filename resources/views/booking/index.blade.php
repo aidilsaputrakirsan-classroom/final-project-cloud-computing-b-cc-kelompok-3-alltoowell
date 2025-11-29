@@ -69,8 +69,8 @@
                     <option value="Transfer">Transfer Bank</option>
                 </select>
 
-                {{-- Tombol --}}
-                <button class="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary-dark">
+                <button
+                    class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 mt-2 block">
                     Konfirmasi Booking
                 </button>
 

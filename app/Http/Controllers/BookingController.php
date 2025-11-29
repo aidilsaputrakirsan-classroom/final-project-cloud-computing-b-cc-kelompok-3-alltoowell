@@ -18,7 +18,7 @@ class BookingController extends Controller
     }
 
     /**
-     * TAMPILKAN FORM BOOKING
+     * Tampilkan Form Booking
      */
     public function show($id)
     {
@@ -39,7 +39,7 @@ class BookingController extends Controller
     }
 
     /**
-     * SIMPAN BOOKING KE SUPABASE
+     * Simpan Booking + Hitung Total Price
      */
     public function store(Request $request, $id)
     {
@@ -49,12 +49,29 @@ class BookingController extends Controller
             'payment_method'  => 'required|string',
         ]);
 
-        // Pastikan user login
         if (!session('user_id')) {
             return redirect('/login')->with('error', 'Silakan login dulu.');
         }
 
-        // Generate ID booking
+        // Ambil data room
+        $roomResponse = Http::withHeaders([
+            'apikey'        => $this->supabaseKey,
+            'Authorization' => 'Bearer ' . $this->supabaseKey,
+        ])->get("{$this->supabaseUrl}/rest/v1/rooms?id=eq.$id&select=*");
+
+        $roomData = $roomResponse->json();
+        if (empty($roomData)) {
+            abort(404, 'Room tidak ditemukan.');
+        }
+
+        $room = $roomData[0];
+
+        // Hitung total price
+        $duration = (int) $request->duration;
+        $pricePerMonth = (int) $room['price'];
+        $totalPrice = $duration * $pricePerMonth;
+
+        // Generate ID
         $uuid       = (string) Str::uuid();
         $bookingId  = 'BK-' . strtoupper(Str::random(6));
 
@@ -68,12 +85,13 @@ class BookingController extends Controller
             'user_email'     => session('user_email'),
             'user_phone'     => session('user_phone'),
             'start_date'     => $request->start_date,
-            'duration'       => (int) $request->duration,
+            'duration'       => $duration,
             'payment_method' => $request->payment_method,
+            'total_price'    => $totalPrice,
             'status'         => 'pending',
         ];
 
-        // Kirim ke Supabase
+        // Simpan ke Supabase
         $response = Http::withHeaders([
             'apikey'        => $this->supabaseKey,
             'Authorization' => 'Bearer ' . $this->supabaseKey,
@@ -89,14 +107,12 @@ class BookingController extends Controller
             ]);
         }
 
-        // Arahkan user ke halaman daftar pesanan
         return redirect()->route('user.bookings')
-            ->with('success', 'Booking berhasil dibuat. Silakan tunggu konfirmasi.');
+            ->with('success', 'Booking berhasil dibuat!');
     }
 
-
     /**
-     * TAMPILKAN PESANAN USER
+     * Pesanan Saya
      */
     public function userBookings()
     {
@@ -106,21 +122,23 @@ class BookingController extends Controller
 
         $userId = session('user_id');
 
-        // Ambil semua booking milik user
+        // Ambil booking + total_price
         $bookings = Http::withHeaders([
             'apikey'        => $this->supabaseKey,
             'Authorization' => 'Bearer ' . $this->supabaseKey,
-        ])->get("{$this->supabaseUrl}/rest/v1/bookings?user_id=eq.$userId&select=*")->json() ?? [];
+        ])->get("{$this->supabaseUrl}/rest/v1/bookings?user_id=eq.$userId&select=*")
+            ->json() ?? [];
 
-        // Ambil semua kamar
-        $roomsData = Http::withHeaders([
+        // Ambil data kamar
+        $rooms = Http::withHeaders([
             'apikey'        => $this->supabaseKey,
             'Authorization' => 'Bearer ' . $this->supabaseKey,
-        ])->get("{$this->supabaseUrl}/rest/v1/rooms")->json();
+        ])->get("{$this->supabaseUrl}/rest/v1/rooms")
+            ->json();
 
-        $roomMap = collect($roomsData)->keyBy('id')->toArray();
+        $roomMap = collect($rooms)->keyBy('id')->toArray();
 
-        // Gabungkan room ke booking
+        // Gabungkan
         foreach ($bookings as &$b) {
             $b['room'] = $roomMap[$b['room_id']] ?? null;
         }

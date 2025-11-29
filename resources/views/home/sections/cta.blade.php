@@ -1,27 +1,32 @@
-<div class="gradient-blue text-white py-20 relative overflow-hidden">
-    <div class="absolute inset-0 pattern-dots opacity-20"></div>
+<div class="relative py-24 bg-gradient-to-b from-blue-600 to-blue-700 text-white overflow-hidden">
 
-    <div class="container mx-auto px-4 text-center relative z-10">
-        <div class="max-w-3xl mx-auto">
+    {{-- titik titik halus --}}
+    <div class="absolute inset-0 opacity-20 pattern-dots"></div>
 
-            <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl animate-pulse-glow">
-                <i data-lucide="rocket" class="w-12 h-12"></i>
-            </div>
+    {{-- glow putih lembut --}}
+    <div class="absolute inset-0 bg-white/5 backdrop-blur-sm"></div>
 
-            <h2 class="text-4xl md:text-5xl font-bold mb-6">
-                Siap Memulai Perjalananmu?
-            </h2>
+    <div class="relative container mx-auto px-6 text-center">
 
-            <p class="text-blue-100 text-lg mb-10">
-                Ratusan mahasiswa ITK sudah menemukan kamar impian mereka dengan KOST-SI. Kamu selanjutnya?
-            </p>
-
-            <a href="{{ route('rooms.index') }}"
-                class="px-12 py-5 bg-white text-primary font-bold rounded-2xl hover:bg-blue-50 shadow-xl transform hover:scale-105 inline-flex items-center gap-3 text-lg">
-                <span>Lihat Daftar Kamar Sekarang</span>
-                <i data-lucide="arrow-right" class="w-6 h-6"></i>
-            </a>
-
+        {{-- Icon bulat --}}
+        <div class="w-20 h-20 bg-white/20 backdrop-blur rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl">
+            <i data-lucide="rocket" class="w-10 h-10"></i>
         </div>
+
+        <h2 class="text-4xl md:text-5xl font-bold mb-4">
+            Siap Memulai Perjalananmu?
+        </h2>
+
+        <p class="text-blue-100 text-lg max-w-2xl mx-auto">
+            Bergabunglah dengan mahasiswa ITK yang sudah menemukan kamar impiannya di KOST-SI. Cepat, modern, dan terpercaya.
+        </p>
+
+        {{-- Tombol CTA --}}
+        <a href="{{ route('rooms.index') }}"
+           class="mt-8 inline-flex items-center gap-3 px-8 py-4 bg-white text-blue-700 font-semibold rounded-xl shadow-lg hover:bg-blue-50 transition">
+            Lihat Daftar Kamar Sekarang
+            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </a>
+
     </div>
 </div>

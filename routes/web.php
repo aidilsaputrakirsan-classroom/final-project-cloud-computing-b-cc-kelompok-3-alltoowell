@@ -13,15 +13,20 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\RoomController as AdminRoomController;
 use App\Http\Controllers\Admin\BookingManagementController;
 use App\Http\Controllers\Admin\PenggunaController;
+use App\Http\Controllers\Admin\ActivityLogController;
 
 /*
+|--------------------------------------------------------------------------
 | HOME (bebas akses)
+|--------------------------------------------------------------------------
 */
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 
 /*
+|--------------------------------------------------------------------------
 | USER (cek login langsung di controller)
+|--------------------------------------------------------------------------
 */
 Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
 Route::get('/rooms/{id}', [RoomController::class, 'show'])->name('rooms.show');
@@ -33,7 +38,9 @@ Route::get('/my-bookings', [BookingController::class, 'userBookings'])->name('us
 
 
 /*
+|--------------------------------------------------------------------------
 | ADMIN (role admin)
+|--------------------------------------------------------------------------
 */
 Route::prefix('admin')
     ->middleware(['role:admin'])
@@ -54,11 +61,17 @@ Route::prefix('admin')
 
         Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna.index');
         Route::put('/pengguna/{id}', [PenggunaController::class, 'update'])->name('pengguna.update');
+
+        // ⭐ ACTIVITY LOG (BARU)
+        Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity.index');
+        Route::get('/activity-log/{id}', [ActivityLogController::class, 'show'])->name('activity.show');
     });
 
 
 /*
+|--------------------------------------------------------------------------
 | AUTH
+|--------------------------------------------------------------------------
 */
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -70,7 +83,9 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
 /*
+|--------------------------------------------------------------------------
 | BLOCK STORAGE PUBLIC ACCESS
+|--------------------------------------------------------------------------
 */
 Route::get('/storage/{path}', function () {
     return abort(404);

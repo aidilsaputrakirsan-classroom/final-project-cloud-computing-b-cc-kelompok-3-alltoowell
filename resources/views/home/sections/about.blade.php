@@ -1,54 +1,77 @@
-<div id="tentang" class="py-24 bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 relative overflow-hidden">
-    <div class="absolute inset-0 pattern-dots opacity-20"></div>
+<section class="py-28 bg-[#F2F7FF] light-dots" id="tentang">
+    <div class="container mx-auto px-6 max-w-7xl">
 
-    <div class="container mx-auto px-4 relative z-10 max-w-6xl">
-
-        <div class="text-center mb-16">
-            <div class="inline-flex items-center gap-2 bg-white px-6 py-2 rounded-full mb-6 shadow-md border border-blue-100">
-                <i data-lucide="info" class="w-4 h-4 text-primary"></i>
-                <span class="text-primary font-semibold text-sm">Tentang Kami</span>
+        {{-- Heading --}}
+        <div class="text-center mb-14">
+            <div class="inline-flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full border border-blue-200 mb-4">
+                <i data-lucide="info" class="w-4 h-4 text-blue-700"></i>
+                <span class="text-blue-700 font-semibold">Tentang Kami</span>
             </div>
 
-            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 leading-snug">
-                <span class="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                    Tentang KOST-SI
-                </span>
-            </h2>
+            <h2 class="text-4xl md:text-5xl font-bold text-primary">Tentang KOST-SI</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto mt-3 leading-relaxed">
+                Platform online untuk mempermudah mahasiswa ITK dalam menemukan kamar kos ideal
+                dengan cepat, aman, dan transparan.
+            </p>
         </div>
 
         <div class="grid md:grid-cols-2 gap-14 items-center">
 
-            {{-- TEXT SIDE --}}
-            <div class="space-y-8">
+            {{-- TEKS --}}
+            <div class="space-y-6">
 
-                <div class="bg-white p-8 rounded-3xl shadow-xl border border-blue-100 hover:shadow-2xl transition-all">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Platform Digital Terpercaya</h3>
-                    <p class="text-gray-700">
-                        KOST-SI membantu mahasiswa ITK mencari dan memesan kamar kos secara online, cepat dan mudah.
-                    </p>
-                </div>
+                <h3 class="text-2xl font-bold text-gray-900">Platform Digital Terpercaya</h3>
 
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-2xl text-white shadow-lg">
-                        <div class="text-3xl font-bold">100%</div>
-                        <p class="text-blue-100 text-sm">Kepuasan</p>
+                <p class="text-gray-700 leading-relaxed">
+                    KOST-SI membantu mahasiswa dalam mendapatkan informasi kos secara lengkap.
+                    Mulai dari harga, fasilitas, lokasi, jumlah kamar tersedia, hingga foto asli kamar
+                    yang telah diverifikasi.
+                </p>
+
+                <p class="text-gray-700 leading-relaxed">
+                    Semua proses mulai dari melihat daftar kamar hingga melakukan pemesanan bisa
+                    selesai dalam beberapa klik.
+                </p>
+
+                <div class="flex gap-4 pt-4">
+                    <div class="bg-blue-700 text-white px-6 py-4 rounded-2xl text-center shadow-md">
+                        <h4 class="text-3xl font-bold">100%</h4>
+                        <p class="opacity-80 text-sm">Kepuasan</p>
                     </div>
 
-                    <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-2xl text-white shadow-lg">
-                        <div class="text-3xl font-bold">50+</div>
-                        <p class="text-green-100 text-sm">Pengguna Aktif</p>
+                    <div class="bg-green-600 text-white px-6 py-4 rounded-2xl text-center shadow-md">
+                        <h4 class="text-3xl font-bold">50+</h4>
+                        <p class="opacity-80 text-sm">Pengguna Aktif</p>
                     </div>
                 </div>
 
             </div>
 
-            {{-- IMAGE SIDE --}}
-            <div class="relative">
-                <div class="absolute -inset-4 bg-gradient-to-r from-primary to-accent rounded-3xl opacity-20 blur-2xl"></div>
-                <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop"
-                     class="relative rounded-3xl shadow-2xl w-full h-96 object-cover border-4 border-white">
+            {{-- SLIDER GAMBAR --}}
+            <div class="rounded-3xl overflow-hidden shadow-xl mx-auto" style="max-width: 450px;">
+                <div class="about-slider">
+
+                    @php
+                        $folder = public_path('images');
+                        $files = glob($folder . '/room*.jpg');
+                    @endphp
+
+                    @if(count($files) > 0)
+                        @foreach($files as $file)
+                            <div>
+                                <img src="{{ asset('images/' . basename($file)) }}"
+                                     class="w-full h-[360px] object-cover" />
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="p-10 text-center text-gray-500">
+                            Tidak ada gambar ditemukan di folder <br> <strong>/public/images/</strong>
+                        </div>
+                    @endif
+
+                </div>
             </div>
 
         </div>
     </div>
-</div>
+</section>

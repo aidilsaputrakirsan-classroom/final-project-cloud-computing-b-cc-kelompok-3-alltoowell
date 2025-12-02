@@ -50,10 +50,18 @@
                     Kamar Kos
                 </a>
 
+                <!-- ACTIVITY LOG -->
+                <a href="{{ route('admin.activity.index') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+                   {{ request()->routeIs('admin.activity.*') ? 'bg-white text-[#1E3A8A] font-semibold shadow-md' : 'hover:bg-white/20' }}">
+                    <i data-lucide="list" class="w-5 h-5"></i>
+                    Activity Log
+                </a>
+
             </nav>
         </div>
 
-        <!-- LOGOUT (lebih naik ke atas) -->
+        <!-- LOGOUT -->
         <div class="px-4 mb-10">
             <form action="{{ route('logout') }}" method="POST">
                 @csrf

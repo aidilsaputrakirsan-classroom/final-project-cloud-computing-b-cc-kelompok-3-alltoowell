@@ -1,49 +1,22 @@
 @extends('layouts.app')
 
-@section('navbar')
-    @include('components.navbar')
-@endsection
+@section('title', 'Beranda')
 
 @section('content')
 
-{{-- HERO SECTION --}}
-<section id="hero">
-    @include('components.home.hero')
-</section>
+{{-- STYLE --}}
+@include('home.sections.style')
 
-{{-- QUICK STATS --}}
-<section id="stats">
-    @include('components.home.stats')
-</section>
-
-{{-- FEATURES --}}
-<section id="features">
-    @include('components.home.features')
-</section>
-
-{{-- CTA --}}
-<section id="cta">
-    @include('components.home.cta')
-</section>
-
-{{-- TESTIMONIAL --}}
-<section id="testimonial">
-    @include('components.home.testimonial')
-</section>
-
-{{-- ABOUT --}}
-<section id="about-section">
-    @include('components.home.about')
-</section>
-
-{{-- CONTACT --}}
-<section id="contact">
-    @include('components.home.contact')
-</section>
-
-{{-- FINAL CTA --}}
-<section id="final-cta">
-    @include('components.home.final-cta')
-</section>
+{{-- SECTION TERURUT --}}
+@include('home.sections.hero')
+@include('home.sections.statistics')
+@include('home.sections.experience')
+@include('home.sections.testimonial')   {{-- hanya 1x! --}}
+@include('home.sections.about')
+@include('home.sections.contact')
 
 @endsection
+
+@push('scripts')
+@include('home.sections.scripts')
+@endpush

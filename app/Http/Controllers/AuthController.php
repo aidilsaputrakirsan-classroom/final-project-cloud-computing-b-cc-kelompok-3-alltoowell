@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use App\Helpers\ActivityLogger; // <-- WAJIB ADA
 
 class AuthController extends Controller
 {
@@ -100,13 +101,23 @@ class AuthController extends Controller
             ]);
         }
 
+        // SIMPAN SESSION
         session([
-            'user_id'    => $user['id'],
-            'user_name'  => $user['name'],
-            'user_email' => $user['email'],
-            'user_role'  => $user['role'],
-            'user_phone' => $user['phone']
+            'user_id'      => $user['id'],
+            'user_name'    => $user['name'],
+            'user_email'   => $user['email'],
+            'user_role'    => $user['role'],
+            'user_phone'   => $user['phone'],
+            'is_logged_in' => true
         ]);
+
+        // ======================
+        //  LOG AKTIVITAS LOGIN
+        // ======================
+        ActivityLogger::log(
+            'login',
+            'User berhasil login ke sistem'
+        );
 
         return redirect()->intended(
             $user['role'] === 'admin'
@@ -117,7 +128,18 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        // ======================
+        //  LOG AKTIVITAS LOGOUT
+        // ======================
+        if (session()->has('user_id')) {
+            ActivityLogger::log(
+                'logout',
+                'User logout dari sistem'
+            );
+        }
+
         $request->session()->flush();
         return redirect('/')->with('success', 'Logout berhasil.');
     }
 }
+

@@ -3,79 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KOST-SI Admin – @yield('title')</title>
+    <title>@yield('title') | KOST-SI Admin</title>
 
-    @vite(['resources/css/app.css','resources/js/app.js'])
-
-    <!-- Tailwind CDN (fallback + utilities) -->
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Lucide Icons -->
+    <!-- Lucide -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <style>
-        .sidebar-link {
-            @apply flex items-center gap-3 px-4 py-3 rounded-lg text-slate-200 hover:bg-slate-700 transition;
-        }
-        .sidebar-link.active {
-            @apply bg-indigo-600 text-white font-semibold;
-        }
-        .card {
-            @apply bg-white rounded-2xl shadow-md p-6 border border-slate-200;
-        }
-    </style>
 </head>
 
-<body class="bg-slate-100">
+<body class="bg-[#F4F7FF]">
 
-<div class="flex min-h-screen">
+<div class="flex">
 
     <!-- SIDEBAR -->
-    <aside class="w-64 bg-slate-900 text-white flex flex-col py-6">
+    <div class="fixed inset-y-0 left-0 w-64 bg-[#1E3A8A] text-white shadow-2xl flex flex-col justify-between py-6">
 
-        <h1 class="text-center text-2xl font-bold tracking-wide mb-8">KOST-SI</h1>
+        <div>
+            <!-- LOGO -->
+            <div class="flex items-center gap-3 px-6 mb-8">
+                <i data-lucide="building-2" class="w-7 h-7 text-white"></i>
+                <span class="text-xl font-bold tracking-wide">KOST-SI</span>
+            </div>
 
-        <nav class="flex-1 space-y-1 px-4">
+            <!-- MENU -->
+            <nav class="space-y-2 px-4">
 
-            <a href="{{ route('admin.dashboard') }}"
-               class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                Dashboard
-            </a>
+                <a href="{{ route('admin.dashboard') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+                   {{ request()->routeIs('admin.dashboard') ? 'bg-white text-[#1E3A8A] font-semibold shadow-md' : 'hover:bg-white/20' }}">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Dashboard
+                </a>
 
-            <a href="{{ route('admin.booking.index') }}"
-               class="sidebar-link {{ request()->routeIs('admin.booking*') ? 'active' : '' }}">
-                <i data-lucide="calendar-check" class="w-5 h-5"></i>
-                Pemesanan
-            </a>
+                <a href="{{ route('admin.booking.index') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+                   {{ request()->routeIs('admin.booking.*') ? 'bg-white text-[#1E3A8A] font-semibold shadow-md' : 'hover:bg-white/20' }}">
+                    <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+                    Status Pemesanan
+                </a>
 
-            <a href="{{ route('admin.rooms.index') }}"
-               class="sidebar-link {{ request()->routeIs('admin.rooms*') ? 'active' : '' }}">
-                <i data-lucide="building-2" class="w-5 h-5"></i>
-                Kamar Kos
-            </a>
+                <a href="{{ route('admin.rooms.index') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+                   {{ request()->routeIs('admin.rooms.*') ? 'bg-white text-[#1E3A8A] font-semibold shadow-md' : 'hover:bg-white/20' }}">
+                    <i data-lucide="bed" class="w-5 h-5"></i>
+                    Kamar Kos
+                </a>
 
-            <a href="{{ route('admin.pengguna.index') }}"
-               class="sidebar-link {{ request()->routeIs('admin.pengguna*') ? 'active' : '' }}">
-                <i data-lucide="users" class="w-5 h-5"></i>
-                Pengguna
-            </a>
+                <!-- ACTIVITY LOG -->
+                <a href="{{ route('admin.activity.index') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+                   {{ request()->routeIs('admin.activity.*') ? 'bg-white text-[#1E3A8A] font-semibold shadow-md' : 'hover:bg-white/20' }}">
+                    <i data-lucide="list" class="w-5 h-5"></i>
+                    Activity Log
+                </a>
 
-        </nav>
+            </nav>
+        </div>
 
-        <form action="{{ route('logout') }}" method="POST" class="px-4">
-            @csrf
-            <button class="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700">
-                Logout
-            </button>
-        </form>
+        <!-- LOGOUT -->
+        <div class="px-4 mb-10">
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button
+                    class="w-full flex items-center gap-3 px-4 py-3 bg-white/10 hover:bg-white/20 rounded-xl transition text-white">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                    Logout
+                </button>
+            </form>
+        </div>
 
-    </aside>
+    </div>
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 p-8">
+    <!-- CONTENT -->
+    <div class="ml-64 w-full p-10">
         @yield('content')
-    </main>
+    </div>
+
 </div>
 
 <script>

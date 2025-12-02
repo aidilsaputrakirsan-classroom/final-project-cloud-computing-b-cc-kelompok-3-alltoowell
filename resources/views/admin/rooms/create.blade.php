@@ -1,24 +1,29 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Tambah Kamar')
 
 @section('content')
-<div class="container mx-auto p-6 max-w-3xl">
-    <h1 class="text-3xl font-bold mb-6" style="color: #5B3FE0;">Tambah Kamar</h1>
+<div class="max-w-3xl mx-auto p-6">
 
-    <form 
-        action="{{ route('admin.rooms.store') }}" 
-        method="POST" 
-        enctype="multipart/form-data"
-    >
+    <h1 class="text-3xl font-bold mb-6 text-blue-900">Tambah Kamar</h1>
+
+    <form action="{{ route('admin.rooms.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         @include('admin.rooms._form')
 
-        <div class="mt-6 flex justify-end gap-2">
-            <a href="{{ route('admin.rooms.index') }}" class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500">Batal</a>
-            <button type="submit" class="bg-[#5B3FE0] text-white px-4 py-2 rounded-lg hover:bg-[#4a32c9]">Tambah Kamar</button>
+        <div class="flex justify-end gap-3 mt-6">
+            <a href="{{ route('admin.rooms.index') }}"
+               class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500">
+               Batal
+            </a>
+
+            <button class="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800">
+                Tambah Kamar
+            </button>
         </div>
+
     </form>
+
 </div>
 @endsection

@@ -2,44 +2,44 @@
 
 use Illuminate\Support\Facades\Route;
 
-// Controllers
+// USER Controllers
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\BookingController;
 
-// Admin Controllers
+// ADMIN Controllers
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\RoomController as AdminRoomController;
 use App\Http\Controllers\Admin\BookingManagementController;
 use App\Http\Controllers\Admin\PenggunaController;
+use App\Http\Controllers\Admin\ActivityLogController;
 
 /*
 |--------------------------------------------------------------------------
-| HOME
+| HOME (bebas akses)
 |--------------------------------------------------------------------------
 */
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-/*
-|--------------------------------------------------------------------------
-| USER ROOMS
-|--------------------------------------------------------------------------
-*/
-Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.list');
-Route::get('/rooms/{id}', [RoomController::class, 'show'])->name('rooms.show');
 
 /*
 |--------------------------------------------------------------------------
-| USER BOOKING
+| USER (cek login langsung di controller)
 |--------------------------------------------------------------------------
 */
+Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
+Route::get('/rooms/{id}', [RoomController::class, 'show'])->name('rooms.show');
+
 Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
 Route::post('/booking/{id}', [BookingController::class, 'store'])->name('booking.store');
 
+Route::get('/my-bookings', [BookingController::class, 'userBookings'])->name('user.bookings');
+
+
 /*
 |--------------------------------------------------------------------------
-| ADMIN
+| ADMIN (role admin)
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')
@@ -49,7 +49,6 @@ Route::prefix('admin')
 
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        // Rooms CRUD
         Route::get('/rooms', [AdminRoomController::class, 'index'])->name('rooms.index');
         Route::get('/rooms/create', [AdminRoomController::class, 'create'])->name('rooms.create');
         Route::post('/rooms', [AdminRoomController::class, 'store'])->name('rooms.store');
@@ -57,14 +56,17 @@ Route::prefix('admin')
         Route::put('/rooms/{id}', [AdminRoomController::class, 'update'])->name('rooms.update');
         Route::delete('/rooms/{id}', [AdminRoomController::class, 'destroy'])->name('rooms.destroy');
 
-        // Booking Management (Admin)
         Route::get('/booking', [BookingManagementController::class, 'index'])->name('booking.index');
         Route::patch('/booking/{id}', [BookingManagementController::class, 'updateStatus'])->name('booking.update');
 
-        // Pengguna
         Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna.index');
         Route::put('/pengguna/{id}', [PenggunaController::class, 'update'])->name('pengguna.update');
+
+        // ⭐ ACTIVITY LOG (BARU)
+        Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity.index');
+        Route::get('/activity-log/{id}', [ActivityLogController::class, 'show'])->name('activity.show');
     });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -79,11 +81,12 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+
 /*
 |--------------------------------------------------------------------------
-| STORAGE PROTECTION (WAJIB AGAR GAMBAR TIDAK TERTELAN ROUTE)
+| BLOCK STORAGE PUBLIC ACCESS
 |--------------------------------------------------------------------------
 */
 Route::get('/storage/{path}', function () {
-    abort(404);
+    return abort(404);
 })->where('path', '.*');

@@ -44,4 +44,3 @@ jobs:
           echo "🎉 Deploy sukses!"
           echo "🔗 Log server: /var/log/autodeploy_${{ github.event.repository.name }}.log"
           echo "🌐 Port aktif: ${{ steps.deploy.outputs.port }}"name: 🚀 Auto Deploy ke STB
-

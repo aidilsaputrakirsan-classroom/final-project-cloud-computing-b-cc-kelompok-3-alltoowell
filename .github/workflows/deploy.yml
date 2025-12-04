@@ -3,7 +3,8 @@ name: 🚀 Auto Deploy ke STB
 on:
   push:
     branches:
-      - development
+    - main
+    - development
 
 jobs:
   deploy:

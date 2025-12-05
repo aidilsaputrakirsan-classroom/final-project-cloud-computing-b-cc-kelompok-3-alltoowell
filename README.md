@@ -42,22 +42,26 @@ Sistem Informasi Kost (SI Kost) adalah aplikasi web berbasis Laravel yang diguna
   - [Generate PDF](#generate-pdf)
   - [Import Data](#import-data)
   - [Screenshot](#screenshot)
-    - [1. Halaman Beranda (Hero Section)](#1-halaman-beranda-hero-section)
-    - [2. Fitur Unggulan — Pengalaman Booking](#2-fitur-unggulan--pengalaman-booking)
-    - [3. Testimonial Mahasiswa](#3-testimonial-mahasiswa)
-    - [4. Tentang KOST-SI](#4-tentang-kost-si)
-    - [5. Halaman Kontak](#5-halaman-kontak)
-    - [6. Halaman Register](#6-halaman-register)
-    - [7. Halaman Login](#7-halaman-login)
-    - [8. Halaman Beranda User Setelah Login](#8-halaman-beranda-user-setelah-login)
-    - [9. Halaman Pesanan Saya](#9-halaman-pesanan-saya)
-    - [10. Dashboard Admin](#10-dashboard-admin)
-    - [11. Booking Terbaru (Admin)](#11-booking-terbaru-admin)
-    - [12. Kelola Pemesanan](#12-kelola-pemesanan)
-    - [13. Activity Log](#13-activity-log)
-    - [14. Detail Aktivitas](#14-detail-aktivitas)
-    - [15. Tambah Kamar](#15-tambah-kamar)
-    - [16. Form Upload Gambar Kamar](#16-form-upload-gambar-kamar)
+    - [**1. Halaman Beranda (Hero Section)**](#1-halaman-beranda-hero-section)
+    - [**2. Fitur Booking**](#2-fitur-booking)
+    - [**3. Testimonial**](#3-testimonial)
+    - [**4. Tentang KOST-SI**](#4-tentang-kost-si)
+    - [**5. Halaman Kontak**](#5-halaman-kontak)
+    - [**6. Halaman Register**](#6-halaman-register)
+    - [**7. Halaman Login**](#7-halaman-login)
+    - [**8. Daftar Kamar Kos**](#8-daftar-kamar-kos)
+    - [**9. Detail Kamar**](#9-detail-kamar)
+    - [**10. Booking Kamar**](#10-booking-kamar)
+    - [**11. Halaman Beranda (User Login)**](#11-halaman-beranda-user-login)
+    - [**12. Halaman Pesanan Saya**](#12-halaman-pesanan-saya)
+    - [**13. Dashboard Admin**](#13-dashboard-admin)
+    - [**14. Dashboard Admin – Booking Terbaru**](#14-dashboard-admin--booking-terbaru)
+    - [**15. Kelola Pemesanan**](#15-kelola-pemesanan)
+    - [**16. Kelola Kamar**](#16-kelola-kamar)
+    - [**17. Tambah Kamar – Form Bagian 1**](#17-tambah-kamar--form-bagian-1)
+    - [**18. Tambah Kamar – Form Bagian 2**](#18-tambah-kamar--form-bagian-2)
+    - [**19. Activity Log**](#19-activity-log)
+    - [**20. Detail Aktivitas**](#20-detail-aktivitas)
   - [Struktur Database](#struktur-database)
     - [Tabel Utama](#tabel-utama)
     - [Relasi](#relasi)
@@ -249,70 +253,143 @@ Fitur import data Excel **belum tersedia**.
 
 ## Screenshot  
 
-### 1. Halaman Beranda (Hero Section)
+### **1. Halaman Beranda (Hero Section)**
+
 ![Halaman Beranda](public/readme/1.png)
-*Tampilan utama ketika pengguna membuka website, menampilkan slogan, CTA, dan statistik kamar.*
+Halaman ini merupakan tampilan utama ketika pengguna pertama kali mengakses website KOST-SI. Bagian hero didesain untuk memberikan kesan profesional dan informatif melalui slogan besar yang menjelaskan fungsi utama platform. Pengguna langsung disuguhkan tombol *Call to Action* untuk melihat daftar kamar, serta rangkuman statistik seperti jumlah kamar tersedia, total pengguna mahasiswa, rating platform, dan layanan pendukung lainnya. Tujuan halaman ini adalah memastikan pengguna memahami manfaat platform sejak pertama kali berkunjung.
 
-### 2. Fitur Unggulan — Pengalaman Booking
+---
+
+### **2. Fitur Booking**
+
 ![Fitur Booking](public/readme/2.png)
-*Menjelaskan tiga fitur utama: proses mudah, keamanan, dan harga transparan.*
+Halaman ini menjelaskan fitur unggulan KOST-SI yang menjadi alasan utama platform ini dibuat untuk mahasiswa ITK. Tiga fitur inti yang ditampilkan meliputi kemudahan proses booking melalui antarmuka yang sederhana, keamanan data pengguna yang dijaga ketat, serta harga transparan tanpa biaya tersembunyi. Bagian ini dirancang untuk memberikan pemahaman menyeluruh tentang keunggulan aplikasi dan menumbuhkan rasa percaya calon pengguna sebelum mereka melanjutkan ke proses berikutnya.
 
-### 3. Testimonial Mahasiswa
+---
+
+### **3. Testimonial**
+
 ![Testimonial](public/readme/3.png)
-*Berisi pendapat nyata dari mahasiswa ITK terhadap platform KOST-SI.*
+Bagian testimonial menampilkan pengalaman nyata mahasiswa ITK yang telah menggunakan layanan KOST-SI. Setiap testimonial memuat nama mahasiswa, asal jurusan, komentar mengenai kualitas platform, serta rating yang diberikan. Struktur slider memudahkan pengguna melihat beberapa ulasan secara teratur tanpa memenuhi seluruh halaman. Tujuannya adalah memperkuat citra positif platform dan memberikan bukti sosial bahwa aplikasi ini memang membantu mahasiswa menemukan kamar kos dengan lebih mudah.
 
-### 4. Tentang KOST-SI
+---
+
+### **4. Tentang KOST-SI**
+
 ![Tentang KOST-SI](public/readme/4.png)
-*Penjelasan lengkap mengenai platform beserta slider foto kamar.*
+Halaman ini menjelaskan latar belakang dan motivasi dibuatnya platform KOST-SI sebagai solusi digital untuk pencarian kamar kos khusus mahasiswa ITK. Pada bagian ini, pengguna dapat membaca penjelasan singkat mengenai misi platform, kemudahan yang ditawarkan, serta manfaat yang dapat diperoleh mahasiswa. Dilengkapi dengan slider foto kamar berkualitas untuk memberikan gambaran visual nyata mengenai jenis kamar yang dapat ditemukan melalui platform.
 
-### 5. Halaman Kontak
+---
+
+### **5. Halaman Kontak**
+
 ![Kontak](public/readme/5.png)
-*Menampilkan info kontak resmi: telepon, email, dan lokasi kampus ITK.*
+Halaman kontak memberikan informasi kepada pengguna mengenai cara menghubungi tim admin atau pengelola platform. Informasi yang ditampilkan terdiri dari nomor telepon, alamat email, serta lokasi kampus ITK Balikpapan sebagai pusat layanan akademik dan perumahan mahasiswa. Bagian ini berfungsi memastikan pengguna dapat memperoleh bantuan ketika menghadapi kendala atau membutuhkan informasi tambahan terkait pemesanan kamar atau penggunaan platform.
 
-### 6. Halaman Register
+---
+
+### **6. Halaman Register**
+
 ![Register](public/readme/6.png)
-*Form pendaftaran pengguna baru dengan tampilan modern dan clean.*
+Form registrasi pengguna baru ditampilkan dengan desain sederhana dan modern untuk memastikan pengalaman pendaftaran yang nyaman dan mudah dipahami. Pengguna diminta mengisi data penting seperti nama lengkap, email aktif, nomor telepon, password, dan konfirmasi password. Layout halaman dibuat dua kolom agar proses pengisian terasa lebih profesional dan efisien. Halaman ini menjadi pintu awal bagi pengguna untuk dapat mengakses seluruh fitur yang tersedia dalam platform.
 
-### 7. Halaman Login
+---
+
+### **7. Halaman Login**
+
 ![Login](public/readme/7.png)
-*Tampilan login bagi pengguna untuk masuk ke sistem.*
+Halaman login merupakan titik autentikasi bagi pengguna yang ingin mengakses akunnya. Pada halaman ini pengguna memasukkan email dan password yang telah terdaftar. Desainnya dibuat minimalis agar pengguna dapat fokus pada proses login. Terdapat pula tautan menuju halaman pendaftaran bagi pengguna baru yang belum memiliki akun.
 
-### 8. Halaman Beranda User Setelah Login
-![Beranda User](public/readme/8.png)
-*User dapat langsung mengakses fitur pemesanan kamar setelah login.*
+---
 
-### 9. Halaman Pesanan Saya
-![Pesanan Saya](public/readme/9.jpeg)
-*Menampilkan daftar riwayat pemesanan user, lengkap dengan status pemesanan.*
+### **8. Daftar Kamar Kos**
 
-### 10. Dashboard Admin
-![Dashboard Admin](public/readme/10.png)
-*Admin dapat melihat grafik pemesanan, pendapatan bulanan, dan statistik jumlah kamar.*
+![Daftar Kamar](public/readme/8.png)
+Halaman ini menampilkan seluruh kamar kos yang tersedia maupun yang telah terisi. Pengguna dapat melakukan pencarian kamar berdasarkan filter seperti harga dan status ketersediaan. Setiap kartu kamar berisi foto kamar, alamat, harga, status tersedia atau tidak, serta tombol untuk melihat detail kamar lebih lanjut. Tujuan halaman ini adalah mempermudah pengguna menelusuri pilihan kamar secara cepat dan efisien.
 
-### 11. Booking Terbaru (Admin)
-![Booking Terbaru](public/readme/11.png)
-*Admin melihat daftar pemesanan terbaru lengkap dengan statusnya.*
+---
 
-### 12. Kelola Pemesanan
-![Kelola Pemesanan](public/readme/12.png)
-*Admin dapat menerima atau menolak pemesanan pengguna secara langsung.*
+### **9. Detail Kamar**
 
-### 13. Activity Log
-![Activity Log](public/readme/13.png)
-*Fitur pencatatan riwayat aktivitas user seperti login, logout, dan tindakan lainnya.*
+![Detail Kamar](public/readme/9.png)
+Halaman detail kamar menampilkan informasi lengkap mengenai sebuah kamar kos, termasuk foto besar kamar, nama kamar, harga per bulan, fasilitas, lokasi, dan peta area sekitar. Bagian ini menawarkan gambaran menyeluruh kepada pengguna sebelum melakukan pemesanan, serta menyediakan tombol *Pesan Sekarang* jika pengguna tertarik untuk melanjutkan ke proses booking. Detail yang lengkap sangat membantu pengguna membuat keputusan dengan lebih yakin.
 
-### 14. Detail Aktivitas
-![Detail Aktivitas](public/readme/14.png)
-*Halaman detail untuk melihat aktivitas spesifik yang dilakukan pengguna.*
+---
 
-### 15. Tambah Kamar
-![Tambah Kamar](public/readme/15.png)
-*Form bagi admin untuk menambah data kamar baru ke sistem.*
+### **10. Booking Kamar**
 
-### 16. Form Upload Gambar Kamar
-![Upload Gambar](public/readme/16.png)
-*Admin dapat mengunggah dan mem-preview gambar kamar sebelum disimpan.*
+![Booking Kamar](public/readme/10.png)
+Halaman ini menyediakan form lengkap bagi pengguna untuk melakukan pemesanan kamar. Pengguna diminta mengisi data seperti nama, kontak, tanggal mulai sewa, durasi sewa, dan metode pembayaran. Di sisi kanan halaman terdapat ringkasan pemesanan yang mencakup total biaya, informasi verifikasi admin, serta syarat dan ketentuan pemesanan. Halaman ini dirancang untuk memastikan seluruh informasi pemesanan disampaikan dengan jelas sebelum pengguna melakukan konfirmasi akhir.
 
+---
+
+### **11. Halaman Beranda (User Login)**
+
+![Beranda Login](public/readme/11.png)
+Setelah pengguna berhasil login, tampilan beranda berubah menyesuaikan status pengguna. Navigasi bar kini menampilkan menu khusus seperti *Pesanan Saya* dan tombol logout, menandakan bahwa pengguna telah terautentikasi. Meskipun tampilannya mirip dengan halaman beranda utama, bagian ini telah menyesuaikan kebutuhan pengguna terdaftar agar mereka dapat mengakses fitur dengan lebih cepat dan personal.
+
+---
+
+### **12. Halaman Pesanan Saya**
+
+![Pesanan Saya](public/readme/12.png)
+Halaman ini berfungsi sebagai pusat informasi bagi pengguna untuk memantau seluruh pemesanan yang pernah dilakukan. Setiap kartu pesanan menampilkan detail seperti nama kamar, tanggal mulai sewa, durasi, total pembayaran, serta status pemesanan. Status ini dapat berupa *Pending*, *Confirmed*, atau *Rejected*. Halaman ini memberikan kejelasan kepada pengguna mengenai perkembangan setiap pemesanan mereka.
+
+---
+
+### **13. Dashboard Admin**
+
+![Dashboard Admin](public/readme/13.png)
+Dashboard admin memberikan ringkasan komprehensif mengenai performa platform. Admin dapat melihat data seperti total pemesanan bulan ini, total pendapatan, pemesanan yang menunggu konfirmasi, jumlah kamar tersedia, serta grafik pemesanan dan pendapatan bulanan. Halaman ini dirancang agar admin dapat memonitor data secara real time dan mengambil keputusan operasional dengan lebih efektif.
+
+---
+
+### **14. Dashboard Admin – Booking Terbaru**
+
+![Booking Terbaru](public/readme/14.png)
+Bagian ini menampilkan daftar pemesanan terbaru yang masuk ke sistem. Setiap baris pemesanan menunjukkan nama pengguna, nama kamar, tanggal pemesanan, total pembayaran, dan status pemesanan. Tampilan ini membantu admin memahami aktivitas terbaru pengguna tanpa harus membuka halaman pemesanan secara penuh.
+
+---
+
+### **15. Kelola Pemesanan**
+
+![Kelola Pemesanan](public/readme/15.png)
+Pada halaman ini admin dapat mengelola seluruh pemesanan pengguna secara terpusat. Data ditampilkan dalam bentuk tabel yang memuat detail penyewa, kamar, total harga, serta status pemesanan. Admin memiliki kontrol penuh untuk menerima atau menolak pemesanan secara langsung. Halaman ini merupakan inti dari pengelolaan operasional pemesanan platform.
+
+---
+
+### **16. Kelola Kamar**
+
+![Kelola Kamar](public/readme/16.png)
+Halaman ini menampilkan seluruh kamar yang terdaftar dalam sistem beserta informasi seperti foto kamar, nama, harga, kapasitas, dan status ketersediaan. Admin dapat melakukan aksi seperti mengedit atau menghapus kamar jika diperlukan. Bagian ini merupakan pusat manajemen data kamar kos yang ada di platform.
+
+---
+
+### **17. Tambah Kamar – Form Bagian 1**
+
+![Tambah Kamar 1](public/readme/17.png)
+Form bagian pertama ini digunakan admin untuk menambahkan kamar kos baru ke dalam sistem. Data yang harus diisi meliputi nama kamar, harga, kapasitas, status tersedia atau tidak, serta fasilitas lengkap. Struktur form dibuat rapi agar admin dapat memasukkan data dengan akurat tanpa risiko kesalahan.
+
+---
+
+### **18. Tambah Kamar – Form Bagian 2**
+
+![Tambah Kamar 2](public/readme/18.png)
+Pada bagian kedua form, admin dapat mengunggah gambar kamar serta melihat preview sebelum gambar disimpan. Selain itu, terdapat input tambahan seperti deskripsi kamar atau lokasi. Halaman ini memastikan bahwa kamar yang ditambahkan memiliki informasi lengkap baik secara visual maupun teks.
+
+---
+
+### **19. Activity Log**
+
+![Activity Log](public/readme/19.png)
+Activity Log berfungsi untuk mencatat seluruh aktivitas penting yang dilakukan oleh pengguna maupun admin, seperti login, logout, penambahan data, atau perubahan status pemesanan. Setiap aktivitas dicatat lengkap dengan user ID, waktu kejadian, dan deskripsi tindakan. Fitur ini penting untuk keperluan audit dan keamanan sistem.
+
+---
+
+### **20. Detail Aktivitas**
+
+![Detail Aktivitas](public/readme/20.png)
+Halaman ini memberikan penjelasan detail terhadap satu aktivitas tertentu dari Activity Log. Informasi yang ditampilkan meliputi nama pengguna, aksi yang dilakukan, waktu aktivitas, serta deskripsi lengkap tindakan tersebut. Halaman ini memudahkan admin melacak dan memahami setiap aktivitas dengan lebih akurat.
 
 ---
 

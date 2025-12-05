@@ -18,29 +18,35 @@ Sistem Informasi Kost (SI Kost) adalah aplikasi web berbasis Laravel yang diguna
     - [Manajemen Admin](#manajemen-admin)
     - [Fitur Sistem](#fitur-sistem)
   - [Tech Stack](#tech-stack)
-    - [Backend](#backend)
-    - [Frontend](#frontend)
-    - [Libraries](#libraries)
-  - [Persyaratan Sistem](#persyaratan-sistem)
-    - [Ekstensi PHP](#ekstensi-php)
+  - [**🖥 Backend**](#-backend)
+  - [**🎨 Frontend**](#-frontend)
+  - [**📦 Libraries (Composer \& NPM)**](#-libraries-composer--npm)
+    - [**Composer (PHP)**](#composer-php)
+    - [**NPM (Frontend)**](#npm-frontend)
+  - [**🗄 Database**](#-database)
+  - [**⚙️ System Requirements**](#️-system-requirements)
+    - [Server](#server)
+    - [PHP Extensions](#php-extensions)
   - [Instalasi](#instalasi)
-    - [1. Clone Repository](#1-clone-repository)
-    - [2. Install Dependencies](#2-install-dependencies)
-    - [3. Setup Environment](#3-setup-environment)
-    - [4. Konfigurasi Database](#4-konfigurasi-database)
-    - [5. Migrasi Database](#5-migrasi-database)
-    - [6. Setup Storage](#6-setup-storage)
-    - [7. Build Asset](#7-build-asset)
-    - [8. Jalankan Aplikasi](#8-jalankan-aplikasi)
-  - [Konfigurasi](#konfigurasi)
-    - [Email Configuration](#email-configuration)
-    - [File Storage (Opsional)](#file-storage-opsional)
+  - [**1. Clone Repository**](#1-clone-repository)
+  - [**2. Install Dependencies**](#2-install-dependencies)
+    - [**Backend – Composer**](#backend--composer)
+    - [**Frontend – Node Modules**](#frontend--node-modules)
+  - [**3. Setup Environment (.env)**](#3-setup-environment-env)
+  - [**4. Konfigurasi Database (MySQL)**](#4-konfigurasi-database-mysql)
+  - [**5. Migrasi Database**](#5-migrasi-database)
+  - [**6. Konfigurasi Supabase (Storage Gambar)**](#6-konfigurasi-supabase-storage-gambar)
+  - [**7. Setup Storage Laravel**](#7-setup-storage-laravel)
+  - [**8. Build Asset (Vite)**](#8-build-asset-vite)
+    - [Mode Development:](#mode-development)
+    - [Mode Production:](#mode-production)
+  - [**9. Menjalankan Aplikasi**](#9-menjalankan-aplikasi)
+- [⚙️ **Konfigurasi Tambahan**](#️-konfigurasi-tambahan)
+  - [**Email Configuration**](#email-configuration)
   - [Role \& Permissions](#role--permissions)
   - [Fitur Berdasarkan Role](#fitur-berdasarkan-role)
     - [User](#user)
     - [Admin](#admin)
-  - [Generate PDF](#generate-pdf)
-  - [Import Data](#import-data)
   - [Screenshot](#screenshot)
     - [**1. Halaman Beranda (Hero Section)**](#1-halaman-beranda-hero-section)
     - [**2. Fitur Booking**](#2-fitur-booking)
@@ -63,12 +69,21 @@ Sistem Informasi Kost (SI Kost) adalah aplikasi web berbasis Laravel yang diguna
     - [**19. Activity Log**](#19-activity-log)
     - [**20. Detail Aktivitas**](#20-detail-aktivitas)
   - [Struktur Database](#struktur-database)
-    - [Tabel Utama](#tabel-utama)
-    - [Relasi](#relasi)
-  - [Penggunaan](#penggunaan)
-  - [Deployment](#deployment)
-  - [Kontribusi](#kontribusi)
-  - [Lisensi](#lisensi)
+    - [**Tabel Utama**](#tabel-utama)
+    - [**Relasi Database**](#relasi-database)
+- [⚙️ Arsitektur \& Komponen](#️-arsitektur--komponen)
+    - [**Arsitektur Aplikasi**](#arsitektur-aplikasi)
+- [✨ Fitur Teknis Utama](#-fitur-teknis-utama)
+- [🧪 Testing](#-testing)
+- [🚀 Penggunaan](#-penggunaan)
+    - [**Login Pertama Kali**](#login-pertama-kali)
+    - [**Alur Penggunaan Sistem**](#alur-penggunaan-sistem)
+- [🛠 Deployment](#-deployment)
+    - [**Kebutuhan Server**](#kebutuhan-server)
+    - [**Optimasi Production**](#optimasi-production)
+- [🤝 Kontribusi](#-kontribusi)
+- [📄 Lisensi](#-lisensi)
+- [❤️ Credits](#️-credits)
 
 ---
 
@@ -89,120 +104,218 @@ Sistem Informasi Kost (SI Kost) adalah aplikasi web berbasis Laravel yang diguna
 
 ### Fitur Sistem  
 - ✅ **Authentication** – Login & registrasi untuk user dan admin  
-- ❌ **Generate PDF** – *Belum tersedia, direncanakan pada versi berikutnya*  
-- ❌ **Import Data Excel** – *Belum tersedia, rencana pengembangan ke depan*  
 
 ---
 
 ## Tech Stack
 
-### Backend  
-- Laravel 12.0  
-- Livewire 3.5  
-- Spatie Laravel Permission 6.7  
-- MySQL  
+## **🖥 Backend**
 
-### Frontend  
-- Bootstrap 5  
-- Sass  
-- Material Design Icons  
-- Font Awesome  
-- jQuery  
-- Alpine.js  
-
-### Libraries  
-- Laravel Mix 6  
-- Laravel Sanctum  
-- Guzzle HTTP  
-- Spatie Ignition  
-- PHPUnit 11  
+* Laravel 10+
+* PHP 8.2
+* Blade Template Engine
+* Eloquent ORM
+* Custom Activity Logger (manual, bukan package)
+* Supabase Storage Integration (custom service via Guzzle)
+* Laravel Routing (web.php, admin.php)
 
 ---
 
-## Persyaratan Sistem
+## **🎨 Frontend**
 
-- PHP ≥ 8.2  
-- MySQL ≥ 5.7  
-- Composer  
-- Node.js & NPM  
-- Apache/Nginx  
+* **Tailwind CSS**
+* **Vite** (build CSS/JS)
+* **Bootstrap JavaScript** (bukan Bootstrap CSS)
+* **Vanilla JavaScript**
+* **Blade Components**
 
-### Ekstensi PHP  
-- OpenSSL  
-- PDO  
-- Mbstring  
-- Tokenizer  
-- XML  
-- JSON  
-- BCMath  
-- GD / Imagick  
+---
 
+## **📦 Libraries (Composer & NPM)**
+
+### **Composer (PHP)**
+
+* **GuzzleHTTP** – untuk Supabase
+* **Symfony Components** – bawaan Laravel
+* **Carbon** – date handling
+* **PHPUnit** – testing default Laravel
+
+### **NPM (Frontend)**
+
+* TailwindCSS
+* PostCSS
+* Autoprefixer
+* Vite
+
+---
+
+## **🗄 Database**
+
+* MySQL
+
+---
+
+## **⚙️ System Requirements**
+
+### Server
+
+* **PHP ≥ 8.2**
+* **MySQL ≥ 5.7**
+* **Composer**
+* **Node.js ≥ 18**
+* **npm**
+* **Apache / Nginx**
+
+### PHP Extensions
+
+* OpenSSL
+* PDO
+* Mbstring
+* Tokenizer
+* XML
+* JSON
+* BCMath
+* Ctype
+* Fileinfo
+* GD *(jika gambar perlu diolah)*
+  
 ---
 
 ## Instalasi
 
-### 1. Clone Repository  
-```bash
-git clone https://github.com/yourusername/si-kost.git
-cd si-kost
-```
+## **1. Clone Repository**
 
-### 2. Install Dependencies  
+```bash
+git clone https://github.com/aidilsaputrakirsan-classroom/final-project-cloud-computing-b-cc-kelompok-3-alltoowell.git
+cd final-project-cloud-computing-b-cc-kelompok-3-alltoowell
+```
+---
+
+## **2. Install Dependencies**
+
+### **Backend – Composer**
+
 ```bash
 composer install
+```
+
+### **Frontend – Node Modules**
+
+```bash
 npm install
-```
-
-### 3. Setup Environment  
-```bash
-cp .env.example .env
-php artisan key:generate
-```
-
-### 4. Konfigurasi Database  
-```env
-DB_DATABASE=si_kost
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-### 5. Migrasi Database  
-```bash
-php artisan migrate --seed
-```
-
-### 6. Setup Storage  
-```bash
-php artisan storage:link
-```
-
-### 7. Build Asset  
-```bash
-npm run dev
-```
-
-### 8. Jalankan Aplikasi  
-```bash
-php artisan serve
 ```
 
 ---
 
-## Konfigurasi
+## **3. Setup Environment (.env)**
 
-### Email Configuration  
+Salin file `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Generate application key:
+
+```bash
+php artisan key:generate
+```
+
+---
+
+## **4. Konfigurasi Database (MySQL)**
+
+Ubah pengaturan berikut di file `.env` sesuai database:
+
+```env
+APP_NAME=SI-KOST
+APP_ENV=local
+APP_KEY=base64:Bzu5zJp0d4llWCSGe24g+s4JZ0I0Ydhrg5HMABz2Otg=
+APP_DEBUG=true
+APP_URL=http://127.0.0.1:8000
+SUPABASE_URL=https://eezmxiakwegbdmgrgdus.supabase.co
+SUPABASE_KEY=
+```
+
+---
+
+## **5. Migrasi Database**
+
+
+
+```bash
+php artisan migrate
+```
+
+---
+
+## **6. Konfigurasi Supabase (Storage Gambar)**
+
+Tambahkan di `.env`:
+
+```env
+SUPABASE_URL=your-supabase-url
+SUPABASE_KEY=your-supabase-api-key
+```
+
+> ⚠ **Jangan upload .env ke GitHub!**
+> Supabase key harus aman.
+
+---
+
+## **7. Setup Storage Laravel**
+
+Untuk menampilkan gambar local (jika ada):
+
+```bash
+php artisan storage:link
+```
+
+---
+
+## **8. Build Asset (Vite)**
+
+### Mode Development:
+
+```bash
+npm run dev
+```
+
+### Mode Production:
+
+```bash
+npm run build
+```
+
+---
+
+## **9. Menjalankan Aplikasi**
+
+Start server Laravel:
+
+```bash
+php artisan serve
+```
+
+Akses aplikasi melalui:
+
+```
+http://127.0.0.1:8000
+```
+
+---
+
+# ⚙️ **Konfigurasi Tambahan**
+
+## **Email Configuration**
+
+Dipakai untuk logging email:
+
 ```env
 MAIL_MAILER=log
 QUEUE_CONNECTION=sync
 SESSION_DRIVER=file
 SESSION_LIFETIME=120
-```
-
-### File Storage (Opsional)  
-```env
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-AWS_BUCKET=your-bucket
 ```
 
 ---
@@ -236,16 +349,6 @@ AWS_BUCKET=your-bucket
 - 🔄 Ubah status kamar (Available / Booked)  
 - 📄 Memproses booking pengguna  
 - 📜 Activity log  
-
----
-
-## Generate PDF  
-Fitur pembuatan PDF **belum tersedia** dalam aplikasi SI Kost.  
-
----
-
-## Import Data  
-Fitur import data Excel **belum tersedia**.  
 
 ---
 
@@ -393,34 +496,100 @@ Halaman ini memberikan penjelasan detail terhadap satu aktivitas tertentu dari A
 
 ## Struktur Database
 
-### Tabel Utama  
-- users  
-- rooms  
-- bookings  
-- activity_logs  
 
-### Relasi  
+### **Tabel Utama**
+
+* **users** – Data pengguna (admin & user)
+* **rooms** – Data kamar kos (harga, fasilitas, status, gambar, lokasi)
+* **bookings** – Data pemesanan kamar oleh pengguna
+* **activity_logs** – Riwayat aktivitas user & admin (login, booking, CRUD kamar, dll)
+
+### **Relasi Database**
+
 ```
-users (1) ─── (n) bookings  
-rooms (1) ─── (n) bookings  
-users (1) ─── (n) activity_logs  
+users (1) ─── (n) bookings
+rooms (1) ─── (n) bookings
+users (1) ─── (n) activity_logs
 ```
 
 ---
 
-## Penggunaan
+# ⚙️ Arsitektur & Komponen
 
-1. User melakukan registrasi  
-2. User login  
-3. User memilih kamar kost  
-4. User melakukan booking  
-5. Admin memverifikasi booking  
-6. User memantau status pemesanan  
-7. Admin mengelola kamar & aktivitas  
+### **Arsitektur Aplikasi**
+
+Aplikasi menggunakan arsitektur **MVC (Model–View–Controller)** khas Laravel:
+
+* **Controllers** – Mengelola logika (booking, kamar, dashboard admin, auth)
+* **Models** – Struktur tabel database (User, Room, Booking, ActivityLog)
+* **Views (Blade)** – Semua halaman frontend (user & admin)
+* **Services** –
+
+  * *SupabaseService*: mengelola upload & penyimpanan gambar
+  * *ActivityLogger*: mencatat setiap aktivitas user/admin
+* **Middleware** – Autentikasi dan proteksi akses admin
 
 ---
 
-## Deployment
+# ✨ Fitur Teknis Utama
+
+* **Autentikasi** (login & registrasi)
+* **Booking kamar real-time**
+* **Dashboard admin lengkap** (statistik, grafik, daftar booking terbaru)
+* **CRUD kamar kos**
+* **Upload gambar ke Supabase Storage**
+* **Activity Log otomatis**
+* **Responsive UI dengan Tailwind CSS**
+* **Vite untuk proses build frontend**
+
+---
+
+# 🧪 Testing
+
+Project sudah mendukung testing dasar Laravel (PHPUnit):
+
+```bash
+php artisan test
+```
+
+Termasuk:
+
+* Unit test default Laravel
+* Feature test dasar
+
+> Project **tidak menggunakan testing kompleks**, jadi bagian ini dibuat sederhana dan sesuai kondisi nyata.
+
+---
+
+# 🚀 Penggunaan
+
+### **Login Pertama Kali**
+
+Setelah setup, login menggunakan akun yang dibuat sendiri (tidak ada seeder default).
+
+### **Alur Penggunaan Sistem**
+
+1. User membuka website dan melihat daftar kamar
+2. User melakukan booking
+3. Admin mengecek booking pada dashboard
+4. Admin menerima atau menolak pemesanan
+5. User melihat status pemesanan di halaman **Pesanan Saya**
+6. Admin mengelola kamar & memantau aktivitas pengguna
+
+---
+
+# 🛠 Deployment
+
+### **Kebutuhan Server**
+
+* PHP ≥ 8.2
+* MySQL
+* Composer
+* Node.js & NPM
+* Web Server (Apache/Nginx)
+* Supabase Storage (untuk upload gambar)
+
+### **Optimasi Production**
 
 ```bash
 php artisan config:cache
@@ -429,16 +598,30 @@ php artisan view:cache
 composer install --optimize-autoloader --no-dev
 ```
 
----
-
-## Kontribusi  
-1. Fork repository  
-2. Buat branch fitur  
-3. Commit perubahan  
-4. Push ke branch  
-5. Pull Request  
+> Tidak ada cron job & queue worker dalam project kamu, jadi tidak dicantumkan.
 
 ---
 
-## Lisensi  
-Project ini menggunakan **MIT License**.
+# 🤝 Kontribusi
+
+1. Fork repository
+2. Buat branch baru
+3. Commit perubahan
+4. Push dan buat Pull Request
+
+---
+
+# 📄 Lisensi
+
+Proyek ini menggunakan lisensi **MIT License**.
+
+---
+
+# ❤️ Credits
+
+* **Laravel Framework**
+* **TailwindCSS**
+* **Supabase Storage**
+* **Vite Build System**
+
+---

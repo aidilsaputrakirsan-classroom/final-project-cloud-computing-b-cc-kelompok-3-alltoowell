@@ -111,8 +111,6 @@ Sistem Informasi Kost (SI Kost) adalah aplikasi web berbasis Laravel yang diguna
 - Alpine.js  
 
 ### Libraries  
-- Barryvdh DomPDF 3.0 *(belum digunakan)*  
-- Maatwebsite Excel 3.1 *(belum digunakan)*  
 - Laravel Mix 6  
 - Laravel Sanctum  
 - Guzzle HTTP  
@@ -311,14 +309,14 @@ Halaman ini menampilkan seluruh kamar kos yang tersedia maupun yang telah terisi
 
 ### **9. Detail Kamar**
 
-![Detail Kamar](public/readme/9.png)
+![Detail Kamar](public/readme/9.jpeg)
 Halaman detail kamar menampilkan informasi lengkap mengenai sebuah kamar kos, termasuk foto besar kamar, nama kamar, harga per bulan, fasilitas, lokasi, dan peta area sekitar. Bagian ini menawarkan gambaran menyeluruh kepada pengguna sebelum melakukan pemesanan, serta menyediakan tombol *Pesan Sekarang* jika pengguna tertarik untuk melanjutkan ke proses booking. Detail yang lengkap sangat membantu pengguna membuat keputusan dengan lebih yakin.
 
 ---
 
 ### **10. Booking Kamar**
 
-![Booking Kamar](public/readme/10.png)
+![Booking Kamar](public/readme/10.jpeg)
 Halaman ini menyediakan form lengkap bagi pengguna untuk melakukan pemesanan kamar. Pengguna diminta mengisi data seperti nama, kontak, tanggal mulai sewa, durasi sewa, dan metode pembayaran. Di sisi kanan halaman terdapat ringkasan pemesanan yang mencakup total biaya, informasi verifikasi admin, serta syarat dan ketentuan pemesanan. Halaman ini dirancang untuk memastikan seluruh informasi pemesanan disampaikan dengan jelas sebelum pengguna melakukan konfirmasi akhir.
 
 ---
@@ -332,7 +330,7 @@ Setelah pengguna berhasil login, tampilan beranda berubah menyesuaikan status pe
 
 ### **12. Halaman Pesanan Saya**
 
-![Pesanan Saya](public/readme/12.png)
+![Pesanan Saya](public/readme/12.jpeg)
 Halaman ini berfungsi sebagai pusat informasi bagi pengguna untuk memantau seluruh pemesanan yang pernah dilakukan. Setiap kartu pesanan menampilkan detail seperti nama kamar, tanggal mulai sewa, durasi, total pembayaran, serta status pemesanan. Status ini dapat berupa *Pending*, *Confirmed*, atau *Rejected*. Halaman ini memberikan kejelasan kepada pengguna mengenai perkembangan setiap pemesanan mereka.
 
 ---
